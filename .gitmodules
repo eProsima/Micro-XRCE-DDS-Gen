@@ -3,4 +3,5 @@
 	url = http://github.com/eProsima/IDL-Parser.git
 [submodule "thirdparty/micro-CDR"]
 	path = thirdparty/micro-CDR
-	url = git@github.com:eProsima/micro-CDR.git
+	url = git@git.sambaserver.eprosima.com:fastcdr/nanocdr.git
+	branch = feature/micrortpsgen
