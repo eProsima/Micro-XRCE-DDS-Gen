@@ -114,10 +114,11 @@ public class micrortpsgen {
     public enum LANGUAGE
     {
         CPP,
-        JAVA
+        JAVA,
+        C
     };
 
-    private LANGUAGE m_languageOption = LANGUAGE.CPP; // Default language -> CPP
+    private LANGUAGE m_languageOption = LANGUAGE.C; // Default language -> C
 
 	/*
 	 * ----------------------------------------------------------------------------------------
@@ -157,7 +158,9 @@ public class micrortpsgen {
                 {
                     String languageOption = args[count++];
 
-                    if(languageOption.equalsIgnoreCase("c++"))
+                    if(languageOption.equalsIgnoreCase("c"))
+                        m_languageOption = LANGUAGE.C;
+                    else if(languageOption.equalsIgnoreCase("c++"))
                         m_languageOption = LANGUAGE.CPP;
                     else if(languageOption.equalsIgnoreCase("java"))
                         m_languageOption = LANGUAGE.JAVA;
@@ -482,11 +485,8 @@ public class micrortpsgen {
 
 			// Load common types template
             extensions.add(new TemplateExtension("struct_type", "keyFunctionHeadersStruct"));
-            extensions.add(new TemplateExtension("union_type", "keyFunctionHeadersUnion"));
 			tmanager.addGroup("TypesHeader", extensions);
-            extensions.clear();
-            extensions.add(new TemplateExtension("struct_type", "keyFunctionSourcesStruct"));
-			tmanager.addGroup("TypesSource", extensions);
+
 
             // Add JNI sources.
             if(m_languageOption == LANGUAGE.JAVA)
@@ -527,10 +527,7 @@ public class micrortpsgen {
 
 				System.out.println("Generating Type definition files...");
 				if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + ".h", maintemplates.getTemplate("TypesHeader"), m_replace)) {
-					if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + ".cxx", maintemplates.getTemplate("TypesSource"), m_replace)) {
-						project.addCommonIncludeFile(onlyFileName + ".h");
-						project.addCommonSrcFile(onlyFileName + ".cxx");
-					}
+					project.addCommonIncludeFile(onlyFileName + ".h");
 				}
 
 			}

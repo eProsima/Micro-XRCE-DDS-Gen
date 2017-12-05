@@ -16,18 +16,18 @@ group eprosima;
 
 paramTypeByValue(typecode) ::= <<
 $if(typecode.primitive)$
-$typecode.cppTypename$
+$typecode.cTypename$
 $else$
-const $typecode.cppTypename$&
+const $typecode.cTypename$&
 $endif$
 >>
 
 varDecl(variable, create) ::= <<
 $if(variable)$
 $if(variable.typecode.primitive)$
-$variable.typecode.cppTypename$  $variable.name$ = $variable.typecode.initialValue$;
+$variable.typecode.cTypename$  $variable.name$ = $variable.typecode.initialValue$;
 $else$
-$variable.typecode.cppTypename$  $variable.name$;
+$variable.typecode.cTypename$  $variable.name$;
 $endif$
 $endif$
 >>
