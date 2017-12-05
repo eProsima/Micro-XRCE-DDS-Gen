@@ -1,0 +1,3 @@
+[submodule "thirdparty/IDL-Parser"]
+	path = thirdparty/IDL-Parser
+	url = http://github.com/eProsima/IDL-Parser.git
