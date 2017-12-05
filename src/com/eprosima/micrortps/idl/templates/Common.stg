@@ -39,14 +39,14 @@ fileHeader(ctx, file, description) ::= <<
 
 paramRetType(typecode) ::= <<
 $if(typecode)$
-$typecode.cppTypename$
+$typecode.cTypename$
 $else$
 void
 $endif$
 >>
 
 paramTypeByRef(typecode) ::= <<
-$typecode.cppTypename$&
+$typecode.cTypename$&
 >>
 
 paramDeclsByValue(params, separatorInicial) ::= <<

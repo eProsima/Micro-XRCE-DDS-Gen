@@ -119,5 +119,5 @@ public class Solution extends com.eprosima.solution.Solution
     private boolean m_subscriberside = true;
     private String m_version = null;
     private String m_example = null;
-    private micrortpsgen.LANGUAGE m_language = micrortpsgen.LANGUAGE.CPP; // Default language -> c++
+    private micrortpsgen.LANGUAGE m_language = micrortpsgen.LANGUAGE.C; // Default language -> C
 }
