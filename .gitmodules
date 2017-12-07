@@ -1,6 +1,6 @@
 [submodule "thirdparty/IDL-Parser"]
 	path = thirdparty/IDL-Parser
-	url = http://github.com/eProsima/IDL-Parser.git
+	url = git@git.sambaserver.eprosima.com:eprosima-common/idl.git 
 [submodule "thirdparty/micro-CDR"]
 	path = thirdparty/micro-CDR
 	url = git@git.sambaserver.eprosima.com:fastcdr/nanocdr.git
