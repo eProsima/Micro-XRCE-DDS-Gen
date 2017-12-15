@@ -487,6 +487,11 @@ public class micrortpsgen {
             extensions.add(new TemplateExtension("struct_type", "keyFunctionHeadersStruct"));
 			tmanager.addGroup("TypesHeader", extensions);
 
+            // Load Publisher template
+            tmanager.addGroup("RTPSPublisherSource");
+
+            // Load Subscriber template
+            tmanager.addGroup("RTPSSubscriberSource");
 
             // Add JNI sources.
             if(m_languageOption == LANGUAGE.JAVA)
@@ -529,6 +534,25 @@ public class micrortpsgen {
 				if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + ".h", maintemplates.getTemplate("TypesHeader"), m_replace)) {
 					project.addCommonIncludeFile(onlyFileName + ".h");
 				}
+
+                if (ctx.existsLastStructure())
+                {
+                    m_atLeastOneStructure = true;
+                    project.setHasStruct(true);
+
+                    if (m_exampleOption != null)
+                    {
+                        System.out.println("Generating Publisher files...");
+                        if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + "Publisher.c", maintemplates.getTemplate("RTPSPublisherSource"), m_replace))
+                        {
+                            project.addProjectSrcFile(onlyFileName + "Publisher.c");
+                        }
+                        if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + "Subscriber.c", maintemplates.getTemplate("RTPSSubscriberSource"), m_replace))
+                        {
+                            project.addProjectSrcFile(onlyFileName + "Subscriber.c");
+                        }
+                    }
+                }
 
 			}
 

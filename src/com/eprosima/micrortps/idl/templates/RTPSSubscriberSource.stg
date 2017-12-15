@@ -1,0 +1,132 @@
+// Copyright 2016 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+group ProtocolHeader;
+
+main(ctx, definitions) ::= <<
+$fileHeader(ctx=ctx,  file=[ctx.filename, "Publisher.cpp"], description=["This file contains the implementation of the publisher functions."])$
+
+#include "$ctx.filename$.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <pthread.h>
+
+$definitions; separator="\n"$
+
+>>
+
+module(ctx, parent, module, definition_list) ::= <<
+$definition_list$
+>>
+
+definition_list(definitions) ::= <<
+$definitions; separator="\n"$
+
+>>
+
+annotation(ctx, annotation) ::= <<>>
+
+interface(ctx, parent, interface, export_list) ::= <<
+$export_list$
+>>
+
+export_list(exports) ::= <<
+$exports; separator="\n"$
+
+>>
+
+exception(ctx, parent, exception) ::= <<>>
+
+operation(ctx, parent, operation, param_list) ::= <<>>
+
+param_list(parameters) ::= <<>>
+
+param(parameter) ::= <<>>
+
+const_decl(ctx, parent, const) ::= <<>>
+
+typedef_decl(ctx, parent, typedefs) ::= <<>>
+
+struct_type(ctx, parent, struct) ::= <<
+
+#define BUFFER_SIZE 1024
+
+char topic_profile[] = "<dds><topic>$if(ctx.lastStructure.typeCode.hasKey)$<kind>WITH_KEY</kind>$endif$<name>$ctx.filename$PubSubTopic</name><dataType>$struct.name$</dataType></topic></dds>";
+
+char data_reader_profile[] = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>$if(ctx.lastStructure.typeCode.hasKey)$WITH_KEY$else$NO_KEY$endif$</kind><name>$ctx.filename$PubSubTopic</name><dataType>$struct.name$</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
+
+uint8_t counter = 0;
+
+void on_$struct.name$_message(XRCEInfo info, MicroBuffer *message)
+{
+    $struct.name$ *topic = deserialize_$struct.name$_message(message);
+    
+    // User code ....
+    printf("Message received and deserialized\n");
+    counter++;
+
+    deallocate_$struct.name$_topic(topic);
+}
+
+void  on_status(XRCEInfo info, uint8_t operation, uint8_t status, void* args)
+{
+    // Process status message. 
+}
+
+int main(int argc, char** argv)
+{
+    // Create a client state.
+    ClientState* state = new_udp_client_state(BUFFER_SIZE, "127.0.0.1", 2019, 2020);
+
+    // Create this client on the Agent. 
+    create_client(state, on_status, NULL);
+
+    // Create a participant on the Agent. 
+    XRCEInfo participant_info = create_participant(state);
+
+    // Register a topic on the given participant. Use a topic configuration read from xml file.
+    create_topic(state, participant_info.object_id, (String) {topic_profile, strlen(topic_profile)});
+
+    // Create a subscriber on the given participant.
+    XRCEInfo subscriber_info = create_subscriber(state, participant_info.object_id);
+
+    // Create a data reader associated with the subscriber. 
+    XRCEInfo data_reader_info = create_data_reader(state, participant_info.object_id, subscriber_info.object_id, (String) {data_reader_profile, strlen(data_reader_profile)});
+
+    // Read several messages from agent.
+    for (int i = 0; i < 10; i++)
+    {
+        // Setup read operation.
+        read_data(state, data_reader_info.object_id, on_$struct.name$_message);
+
+        // Send state to the Agent. 
+        send_to_agent(state);
+
+        uint8_t current_counter = counter;
+        while (current_counter == counter)
+        {
+            receive_from_agent(state);
+        }
+    }
+    
+    // Free all the ClientState resources.
+    free_client_state(state);
+}
+
+>>
+
+union_type(ctx, parent, union) ::= <<>>
+
+enum_type(ctx, parent, enum) ::= <<>>
