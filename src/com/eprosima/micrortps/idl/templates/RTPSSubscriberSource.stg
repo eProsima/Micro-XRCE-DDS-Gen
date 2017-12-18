@@ -67,15 +67,16 @@ char topic_profile[] = "<dds><topic>$if(ctx.lastStructure.typeCode.hasKey)$<kind
 
 char data_reader_profile[] = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>$if(ctx.lastStructure.typeCode.hasKey)$WITH_KEY$else$NO_KEY$endif$</kind><name>$ctx.filename$PubSubTopic</name><dataType>$struct.name$</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
 
-uint8_t counter = 0;
-
-void on_$struct.name$_message(XRCEInfo info, MicroBuffer *message)
+void on_$struct.name$_message(XRCEInfo info, MicroBuffer *message, void *callback_args)
 {
+    int *counter = (int *) callback_args;
     $struct.name$ *topic = deserialize_$struct.name$_message(message);
     
     // User code ....
     printf("Message received and deserialized\n");
-    counter++;
+
+    // Counter increment.
+    (*counter)++;
 
     deallocate_$struct.name$_topic(topic);
 }
@@ -105,11 +106,13 @@ int main(int argc, char** argv)
     // Create a data reader associated with the subscriber. 
     XRCEInfo data_reader_info = create_data_reader(state, participant_info.object_id, subscriber_info.object_id, (String) {data_reader_profile, strlen(data_reader_profile)});
 
+    int counter = 0;
+
     // Read several messages from agent.
     for (int i = 0; i < 10; i++)
     {
         // Setup read operation.
-        read_data(state, data_reader_info.object_id, on_$struct.name$_message);
+        read_data(state, data_reader_info.object_id, on_$struct.name$_message, (void *) &counter);
 
         // Send state to the Agent. 
         send_to_agent(state);
