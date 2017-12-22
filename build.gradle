@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // internal plugins
-
 apply plugin: 'java'
 apply plugin: 'eclipse' // Eclipse integration
 
@@ -79,20 +78,29 @@ compileJava {
     targetCompatibility = 1.6
 }
 
+
 task testCodeGen(type: JavaExec) {
     File outputDir = file("${project.buildDir}/test")
     outputDir.exists() || outputDir.mkdirs()
 
-    workingDir './build/test/'
-    String exec_dir = '../../share/micrortps/'
-    String idl_dir = '../../test/'
+    workingDir './'
+    
+    String platform
+    if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+        platform = 'x64Linux2.6gcc'
+    } else {
+        platform = 'x64Win64VS2015'
+    }
 
     main = '-jar';
     args = [
-        exec_dir + 'micrortpsgen.jar',
-        idl_dir + 'test.idl',
+        'share/micrortps/micrortpsgen.jar',
+        'test/test.idl',
         '-replace',
         '-example',
-        'x64Linux2.6gcc'
+        platform,
+	'-d',
+	outputDir,
+	'-ppDisable'
     ]
 }
