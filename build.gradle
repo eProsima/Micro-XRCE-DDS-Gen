@@ -78,3 +78,21 @@ compileJava {
     sourceCompatibility = 1.6
     targetCompatibility = 1.6
 }
+
+task testCodeGen(type: JavaExec) {
+    File outputDir = file("${project.buildDir}/test")
+    outputDir.exists() || outputDir.mkdirs()
+
+    workingDir './build/test/'
+    String exec_dir = '../../share/micrortps/'
+    String idl_dir = '../../test/'
+
+    main = '-jar';
+    args = [
+        exec_dir + 'micrortpsgen.jar',
+        idl_dir + 'test.idl',
+        '-replace',
+        '-example',
+        'x64Linux2.6gcc'
+    ]
+}

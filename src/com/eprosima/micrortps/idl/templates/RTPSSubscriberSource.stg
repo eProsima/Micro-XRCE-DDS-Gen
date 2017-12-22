@@ -21,7 +21,6 @@ $fileHeader(ctx=ctx,  file=[ctx.filename, "Publisher.cpp"], description=["This f
 
 #include <stdio.h>
 #include <string.h>
-#include <pthread.h>
 
 $definitions; separator="\n"$
 
