@@ -59,72 +59,85 @@ const_decl(ctx, parent, const) ::= <<>>
 typedef_decl(ctx, parent, typedefs) ::= <<>>
 
 struct_type(ctx, parent, struct) ::= <<
+const uint8_t $struct.name$_id = 0x01;
 
-#define BUFFER_SIZE 1024
+const char* topic_xml = "<dds><topic>$if(ctx.lastStructure.typeCode.hasKey)$<kind>WITH_KEY</kind>$endif$<name>$ctx.filename$PubSubTopic</name><dataType>$struct.name$</dataType></topic></dds>";
+const char* subscriber_xml = "<subscriber name=\"MySubscriber\"";
+const char* datareader_xml = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>$if(ctx.lastStructure.typeCode.hasKey)$WITH_KEY$else$NO_KEY$endif$</kind><name>$ctx.filename$PubSubTopic</name><dataType>$struct.name$</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
 
-char topic_profile[] = "<dds><topic>$if(ctx.lastStructure.typeCode.hasKey)$<kind>WITH_KEY</kind>$endif$<name>$ctx.filename$PubSubTopic</name><dataType>$struct.name$</dataType></topic></dds>";
-
-char data_reader_profile[] = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>$if(ctx.lastStructure.typeCode.hasKey)$WITH_KEY$else$NO_KEY$endif$</kind><name>$ctx.filename$PubSubTopic</name><dataType>$struct.name$</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
-
-void on_$struct.name$_message(XRCEInfo info, MicroBuffer *message, void *callback_args)
+void check_and_print_error(Session* session)
 {
-    int *counter = (int *) callback_args;
-    $struct.name$ *topic = deserialize_$struct.name$_message(message);
-    
-    // User code ....
-    printf("Message received and deserialized\n");
-
-    // Counter increment.
-    (*counter)++;
-
-    deallocate_$struct.name$_topic(topic);
+    if (session->last_status_received)
+    {
+        if (session->last_status.status != STATUS_OK)
+        {
+            printf("%sStatus error%s\n", "\x1B[1;31m", "\x1B[0m");
+        }
+    }
+    else
+    {
+        printf("%sConnection error%s\n", "\x1B[1;31m", "\x1B[0m");
+    }
 }
 
-void  on_status(XRCEInfo info, uint8_t operation, uint8_t status, void* args)
+void on_topic(ObjectId id, MicroBuffer* serialized_topic, void* args)
 {
-    // Process status message. 
+    if ($struct.name$_id == id.data[0])
+    {
+        $struct.name$ topic;
+        deserialize_$struct.name$_topic(serialized_topic, &topic);
+
+        printf("Received topic");
+    }
 }
 
 int main(int argc, char** argv)
 {
-    // Create a client state.
-    ClientState* state = new_udp_client_state(BUFFER_SIZE, "127.0.0.1", 2019, 2020);
-
-    // Create this client on the Agent. 
-    create_client(state, on_status, NULL);
-
-    // Create a participant on the Agent. 
-    XRCEInfo participant_info = create_participant(state);
-
-    // Register a topic on the given participant. Use a topic configuration read from xml file.
-    create_topic(state, participant_info.object_id, (String) {topic_profile, strlen(topic_profile)});
-
-    // Create a subscriber on the given participant.
-    XRCEInfo subscriber_info = create_subscriber(state, participant_info.object_id);
-
-    // Create a data reader associated with the subscriber. 
-    XRCEInfo data_reader_info = create_data_reader(state, participant_info.object_id, subscriber_info.object_id, (String) {data_reader_profile, strlen(data_reader_profile)});
-
-    int counter = 0;
-
-    // Read several messages from agent.
-    for (int i = 0; i < 10; i++)
+    /* Init session. */
+    Session my_session;
+    ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
+    uint8_t ip[4] = {{127, 0, 0, 1}};
+    uint16_t port = 2019;
+    if (!new_udp_session(&my_session, 0x01, key, ip, port, on_topic, NULL))
     {
-        // Setup read operation.
-        read_data(state, data_reader_info.object_id, on_$struct.name$_message, (void *) &counter);
+        return 1;
+    }
 
-        // Send state to the Agent. 
-        send_to_agent(state);
+    init_session_syn(&my_session);
+    check_and_print_error(&my_session);
 
-        uint8_t current_counter = counter;
-        while (current_counter == counter)
-        {
-            receive_from_agent(state);
-        }
+    /* Init XRCE object. */
+    ObjectId participant_id = {{0x00, OBJK_PARTICIPANT}};
+    create_participant_sync_by_ref(&my_session, participant_id, "default_participant", false, false);
+    check_and_print_error(&my_session);
+
+    ObjectId topic_id = {{0x00, OBJK_TOPIC}};
+    create_topic_sync_by_xml(&my_session, topic_id, topic_xml, participant_id, false, false);
+    check_and_print_error(&my_session);
+
+    ObjectId subscriber_id = {{$struct.name$_id, OBJK_SUBSCRIBER}};
+    create_subscriber_sync_by_xml(&my_session, subscriber_id, subscriber_xml, participant_id, false, false);
+    check_and_print_error(&my_session);
+
+    ObjectId datareader_id = {{$struct.name$_id, OBJK_DATAREADER}};
+    create_subscriber_sync_by_xml(&my_session, datareader_id, datareader_xml, subscriber_id, false, false);
+    check_and_print_error(&my_session);
+    
+    /* Main loop. */
+    while (true)
+    {
+        /* Request data. */
+        read_data_sync(&my_session, datareader_id);
+        check_and_print_error(&my_session);
+
+        run_communication(&my_session);
+
+        sleep(1);
     }
     
-    // Free all the ClientState resources.
-    free_client_state(state);
+    close_session(&my_session);
+    
+    return 0;
 }
 
 >>

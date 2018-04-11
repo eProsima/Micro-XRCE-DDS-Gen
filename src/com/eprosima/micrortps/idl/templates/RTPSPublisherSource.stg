@@ -58,49 +58,93 @@ const_decl(ctx, parent, const) ::= <<>>
 typedef_decl(ctx, parent, typedefs) ::= <<>>
 
 struct_type(ctx, parent, struct) ::= <<
+const uint8_t $struct.name$_id = 0x01;
 
-#define BUFFER_SIZE 1024
+const char* topic_xml = "<dds><topic>$if(ctx.lastStructure.typeCode.hasKey)$<kind>WITH_KEY</kind>$endif$<name>$ctx.filename$PubSubTopic</name><dataType>$struct.name$</dataType></topic></dds>";
+const char* publisher_xml = "<publisher name=\"MyPublisher\"";
+const char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>$if(ctx.lastStructure.typeCode.hasKey)$WITH_KEY$else$NO_KEY$endif$</kind><name>$ctx.filename$PubSubTopic</name><dataType>$struct.name$</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
 
-char topic_profile[] = "<dds><topic>$if(ctx.lastStructure.typeCode.hasKey)$<kind>WITH_KEY</kind>$endif$<name>$ctx.filename$PubSubTopic</name><dataType>$struct.name$</dataType></topic></dds>";
-
-char data_writer_profile[] = "<profiles><publisher profile_name=\"default_xrce_publiser_profile\"><topic><kind>$if(ctx.lastStructure.typeCode.hasKey)$WITH_KEY$else$NO_KEY$endif$</kind><name>$ctx.filename$PubSubTopic</name><dataType>$struct.name$</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
-
-void  on_status(XRCEInfo info, uint8_t operation, uint8_t status, void* args)
+void check_and_print_error(Session* session)
 {
-    // Process status message. 
+    if (session->last_status_received)
+    {
+        if (session->last_status.status != STATUS_OK)
+        {
+            printf("%sStatus error%s\n", "\x1B[1;31m", "\x1B[0m");
+        }
+    }
+    else
+    {
+        printf("%sConnection error%s\n", "\x1B[1;31m", "\x1B[0m");
+    }
+}
+
+void on_topic(ObjectId id, MicroBuffer* serialized_topic, void* args)
+{
+    if ($struct.name$_id == id.data[0])
+    {
+        $struct.name$ topic;
+        deserialize_$struct.name$_topic(serialized_topic, &topic);
+
+        printf("Received topic");
+    }
 }
 
 int main(int argc, char** argv)
 {
-    // Create a client state.
-    ClientState* state = new_udp_client_state(BUFFER_SIZE, "127.0.0.1", 2019, 2020);
+    /* Init session. */
+    Session my_session;
+    ClientKey key = {{0x11, 0x22, 0x33, 0x44}};
+    uint8_t ip[4] = {{127, 0, 0, 1}};
+    uint16_t port = 2019;
+    if (!new_udp_session(&my_session, 0x01, key, ip, port, on_topic, NULL))
+    {
+        return 1;
+    }
 
-    // Create this client on the Agent. 
-    create_client(state, on_status, NULL);
+    init_session_syn(&my_session);
+    check_and_print_error(&my_session);
 
-    // Create a participant on the Agent. 
-    XRCEInfo participant_info = create_participant(state);
+    /* Init XRCE object. */
+    ObjectId participant_id = {{0x00, OBJK_PARTICIPANT}};
+    create_participant_sync_by_ref(&my_session, participant_id, "default_participant", false, false);
+    check_and_print_error(&my_session);
 
-    // Register a topic on the given participant. Use a topic configuration read from xml file.
-    create_topic(state, participant_info.object_id, (String) {topic_profile, strlen(topic_profile)});
+    ObjectId topic_id = {{0x00, OBJK_TOPIC}};
+    create_topic_sync_by_xml(&my_session, topic_id, topic_xml, participant_id, false, false);
+    check_and_print_error(&my_session);
 
-    // Create a publisher on the given participant.
-    XRCEInfo publisher_info = create_publisher(state, participant_info.object_id);
+    ObjectId publisher_id = {{$struct.name$_id, OBJK_PUBLISHER}};
+    create_publisher_sync_by_xml(&my_session, publisher_id, publisher_xml, participant_id, false, false);
+    check_and_print_error(&my_session);
 
-    // Create a data writer associated with the publisher. 
-    XRCEInfo data_writer_info = create_data_writer(state, participant_info.object_id, publisher_info.object_id, (String) {data_writer_profile, strlen(data_writer_profile)});
+    ObjectId datawriter_id = {{$struct.name$_id, OBJK_DATAWRITER}};
+    create_publisher_sync_by_xml(&my_session, datawriter_id, datawriter_xml, publisher_id, false, false);
+    check_and_print_error(&my_session);
+    
+    /* Main loop. */
+    while (true)
+    {
+        /* Write $struct.name$ topic. */
+        OutputReliableStream* reliable_stream = &my_session.output_reliable_stream;
 
-    // Prepare and write the user data to be sent.
-    $struct.name$ my_topic;
+        $struct.name$ topic = {0};
+        uint32_t topic_size = size_of_$struct.name$_topic(&topic, 0);
+        MicroBuffer* topic_buffer = prepare_reliable_stream_for_topic(reliable_stream, datawriter_id, topic_size);
+        if (topic_buffer != NULL)
+        {
+            serialize_$struct.name$_topic(topic_buffer, &topic);
+            printf("Sent topic\n");
+        }
 
-    // Write user type data.
-    write_data(state, data_writer_info.object_id, serialize_$struct.name$_topic, &my_topic);
+        run_communication(&my_session);
 
-    // Send the data through the UDP transport. 
-    send_to_agent(state);
-
-    // Free all the ClientState resources.
-    free_client_state(state);
+        sleep(1);
+    }
+    
+    close_session(&my_session);
+    
+    return 0;
 }
 >>
 
