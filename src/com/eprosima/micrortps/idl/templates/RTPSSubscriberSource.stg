@@ -15,12 +15,9 @@
 group ProtocolHeader;
 
 main(ctx, definitions) ::= <<
-$fileHeader(ctx=ctx,  file=[ctx.filename, "Publisher.cpp"], description=["This file contains the implementation of the publisher functions."])$
+$fileHeader(ctx=ctx,  file=[ctx.filename, "Subscriber.c"], description=["This file contains the implementation of the publisher functions."])$
 
 #include "$ctx.filename$.h"
-
-#include <stdio.h>
-#include <string.h>
 
 $definitions; separator="\n"$
 
@@ -65,7 +62,7 @@ const char* topic_xml = "<dds><topic>$if(ctx.lastStructure.typeCode.hasKey)$<kin
 const char* subscriber_xml = "<subscriber name=\"MySubscriber\"";
 const char* datareader_xml = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>$if(ctx.lastStructure.typeCode.hasKey)$WITH_KEY$else$NO_KEY$endif$</kind><name>$ctx.filename$PubSubTopic</name><dataType>$struct.name$</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
 
-void check_and_print_error(Session* session)
+static void check_and_print_error(Session* session)
 {
     if (session->last_status_received)
     {
@@ -96,14 +93,14 @@ int main(int argc, char** argv)
     /* Init session. */
     Session my_session;
     ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
-    uint8_t ip[4] = {{127, 0, 0, 1}};
+    uint8_t ip[4] = {127, 0, 0, 1};
     uint16_t port = 2019;
     if (!new_udp_session(&my_session, 0x01, key, ip, port, on_topic, NULL))
     {
         return 1;
     }
 
-    init_session_syn(&my_session);
+    init_session_sync(&my_session);
     check_and_print_error(&my_session);
 
     /* Init XRCE object. */
@@ -135,7 +132,7 @@ int main(int argc, char** argv)
         sleep(1);
     }
     
-    close_session(&my_session);
+    close_session_sync(&my_session);
     
     return 0;
 }
