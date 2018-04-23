@@ -124,12 +124,12 @@ int main(int argc, char** argv)
     while (true)
     {
         /* Request data. */
-        read_data_sync(&my_session, datareader_id);
+        read_data_sync(&my_session, datareader_id, STREAMID_BUILTIN_RELIABLE);
         check_and_print_error(&my_session);
 
         run_communication(&my_session);
 
-        sleep(1);
+        ms_sleep(1000);
     }
     
     close_session_sync(&my_session);

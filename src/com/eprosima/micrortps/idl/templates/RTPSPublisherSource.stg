@@ -117,7 +117,7 @@ int main(int argc, char** argv)
 
         run_communication(&my_session);
 
-        sleep(1);
+        ms_sleep(1);
     }
     
     close_session_sync(&my_session);
