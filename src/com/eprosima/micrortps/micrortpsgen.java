@@ -61,7 +61,7 @@ import com.eprosima.idl.parser.typecode.PrimitiveTypeCode;
 import com.eprosima.idl.parser.typecode.TypeCode;
 import com.eprosima.idl.util.Util;
 import com.eprosima.log.ColorMessage;
-import com.eprosima.microcdr.idl.generator.TypesGenerator;
+import com.eprosima.micrortps.idl.generator.TypesGenerator;
 
 // TODO: Implement Solution & Project in com.eprosima.micrortps.solution
 
@@ -271,7 +271,7 @@ public class micrortpsgen {
 
 			// Load string templates
 			System.out.println("Loading templates...");
-            TemplateManager.setGroupLoaderDirectories("com/eprosima/micrortps/idl/templates:com/eprosima/microcdr/idl/templates");
+            TemplateManager.setGroupLoaderDirectories("com/eprosima/micrortps/idl/templates");
 
 			// In local for all products
             if(m_os.contains("Windows"))
@@ -293,7 +293,7 @@ public class micrortpsgen {
             }
 
 			if (m_exampleOption != null && !m_exampleOption.contains("Win")) {
-				solution.addLibrary("microcdr");
+				solution.addLibrary("micrortps");
 			}
 
 			// Add product library

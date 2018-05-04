@@ -23,7 +23,7 @@ import com.eprosima.idl.parser.tree.Annotation;
 import com.eprosima.idl.parser.typecode.TypeCode;
 import com.eprosima.micrortps.idl.parser.typecode.StructTypeCode;
 
-public class Context extends com.eprosima.idl.context.Context implements com.eprosima.microcdr.idl.context.Context
+public class Context extends com.eprosima.idl.context.Context implements com.eprosima.micrortps.idl.context.Context
 {
     // TODO Remove middleware parameter. It is temporal while cdr and rest don't have async functions.
     public Context(String filename, String file, ArrayList includePaths, boolean subscribercode, boolean publishercode,
@@ -127,12 +127,12 @@ public class Context extends com.eprosima.idl.context.Context implements com.epr
 
     public String getProduct()
     {
-        return "microcdr";
+        return "micrortps";
     }
 
     public String getNamespace()
     {
-        return "microcdr";
+        return "micrortps";
     }
 
     public boolean isCdr()

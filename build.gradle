@@ -51,13 +51,10 @@ sourceSets {
     main {
         java {
             srcDir 'src'
-            srcDir 'thirdparty/micro-CDR/src/java'
         }
 
         resources {
             srcDir 'src'
-            include '**/*.stg'
-            srcDir 'thirdparty/micro-CDR/src/java'
             include '**/*.stg'
         }
     }
