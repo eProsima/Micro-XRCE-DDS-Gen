@@ -797,8 +797,8 @@ public class micrortpsgen {
 			makecxx.setAttribute("example", m_exampleOption);
 			makecxx.setAttribute("arch", arch);
 
-			returnedValue = Utils.writeFile(m_outputDir + "makefile_" + m_exampleOption, makecxx, m_replace);
-
+			//returnedValue = Utils.writeFile(m_outputDir + "makefile_" + m_exampleOption, makecxx, m_replace);
+            returnedValue = true;
 		}
 
 		return returnedValue;
