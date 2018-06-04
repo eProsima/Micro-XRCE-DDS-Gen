@@ -1,0 +1,51 @@
+// Copyright 2018 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+group CMakeLists;
+
+cmakelists(solution, example, arch) ::= <<
+
+cmake_minimum_required(VERSION 2.8.12)
+if (\${CMAKE_VERSION} VERSION_GREATER 3.0)
+    cmake_policy(SET CMP0048 NEW)
+endif()
+
+project(client_examples)
+
+find_package(microcdr REQUIRED)
+find_package(micrortps_transport REQUIRED)
+find_package(micrortps_client REQUIRED)
+
+# Warnings
+if(MSVC OR MSVC_IDE)
+    set(CMAKE_C_FLAGS "\${CMAKE_C_FLAGS} /W4 /wd4700 /wd4996 /wd4820 /wd4255 /wd4668")
+else()
+    set(CMAKE_C_FLAGS "\${CMAKE_C_FLAGS} -pedantic -fstrict-aliasing -Wall -Wcast-align -Wshadow")
+endif()
+
+$solution.projects : {$pub_sub_execs(project=it, libraries=solution.libraries)$}; separator="\n"$
+
+>>
+
+pub_sub_execs(project, libraries) ::= <<
+
+# $project.name$ Subscriber
+add_executable($project.name$Subscriber $project.name$Subscriber.c $project.name$.c)
+target_link_libraries($project.name$Subscriber $solution.libraries : {$it$}; separator=" "$)
+
+# $project.name$ Publisher
+add_executable($project.name$Publisher $project.name$Publisher.c $project.name$.c)
+target_link_libraries($project.name$Publisher micrortps_client)
+
+>>

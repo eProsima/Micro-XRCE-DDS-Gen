@@ -14,7 +14,14 @@
 
 group TypesSource;
 
-main(ctx, definitions) ::= <<>>
+main(ctx, definitions) ::= <<
+$fileHeader(file=[ctx.filename, ".c"], description=["This source file contains the definition of the described types in the IDL file."])$
+
+#include "$ctx.filename$.h"
+
+$definitions; separator="\n"$
+
+>>
 
 module(ctx, parent, module, definition_list) ::= <<>>
 
@@ -38,7 +45,55 @@ const_decl(ctx, parent, const) ::= <<>>
 
 typedef_decl(ctx, parent, typedefs) ::= <<>>
 
-struct_type(ctx, parent, struct, extensions) ::= <<>>
+struct_type(ctx, parent, struct, extensions) ::= <<
+bool serialize_$struct.name$_topic(MicroBuffer* writer, const $struct.name$* topic)
+{
+    $struct.members : { member |$object_serialization(ctx=ctx, object=member)$}; separator=""$
+    return writer->error == BUFFER_OK;
+}
+
+bool deserialize_$struct.name$_topic(MicroBuffer* reader, $struct.name$* topic)
+{
+    $struct.members : { member |$object_deserialization(ctx=ctx, object=member)$}; separator=""$
+    return reader->error == BUFFER_OK;
+}
+
+uint32_t size_of_$struct.name$_topic(const $struct.name$* topic)
+{
+    uint32_t size = 0;
+
+    $struct.members : { member|$serialized_size(ctx=ctx, object=member, data="topic", var="size")$};separator=""$
+    return size;
+}
+
+bool write_$struct.name$(Session* session, ObjectId datawriter_id, StreamId stream_id, $struct.name$* topic)
+{
+    if (session == NULL)
+    {
+        return false;
+    }
+
+    bool result = false;
+    uint32_t topic_size = size_of_$struct.name$_topic(topic);
+    MicroBuffer* topic_buffer = NULL;
+
+    if (128 > stream_id)
+    {
+        topic_buffer = prepare_best_effort_stream_for_topic(&session->output_best_effort_stream, datawriter_id, topic_size);
+    }
+    else
+    {
+        topic_buffer = prepare_reliable_stream_for_topic(&session->output_reliable_stream, datawriter_id, topic_size);
+    }
+
+    if (topic_buffer != NULL)
+    {
+        result = serialize_$struct.name$_topic(topic_buffer, topic);
+    }
+
+    return result;
+}
+>>
 
 union_type(ctx, parent, union) ::= <<>>
 

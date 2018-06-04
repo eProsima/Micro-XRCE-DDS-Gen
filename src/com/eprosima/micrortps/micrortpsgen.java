@@ -292,13 +292,8 @@ public class micrortpsgen {
                     solution.addInclude("$(JAVA_HOME)/include/linux");
             }
 
-			if (m_exampleOption != null && !m_exampleOption.contains("Win")) {
-				solution.addLibrary("micrortps");
-			}
-
 			// Add product library
-			solution.addLibrary("micrortps");
-
+			solution.addLibrary("micrortps_client");
 
 			for (int count = 0; returnedValue && (count < m_idlFiles.size()); ++count) {
 				Project project = process(m_idlFiles.get(count));
@@ -442,7 +437,7 @@ public class micrortpsgen {
 
 		try {
 			// Protocol CDR
-			project = parseIDL(idlFilename); // TODO: Quitar archivos copiados TypesHeader.stg, TypesSource.stg, PubSubTypeHeader.stg de la carpeta com.eprosima.micrortps.idl.templates
+			project = parseIDL(idlFilename); 
 		} catch (Exception ioe) {
 			System.out.println(ColorMessage.error() + "Cannot generate the files");
 			if (!ioe.getMessage().equals("")) {
@@ -451,7 +446,6 @@ public class micrortpsgen {
 		}
 
 		return project;
-
 	}
 
 	private Project parseIDL(String idlFilename) {
@@ -486,6 +480,7 @@ public class micrortpsgen {
 			// Load common types template
             extensions.add(new TemplateExtension("struct_type", "keyFunctionHeadersStruct"));
 			tmanager.addGroup("TypesHeader", extensions);
+			tmanager.addGroup("TypesSource", extensions);
 
             // Load Publisher template
             tmanager.addGroup("RTPSPublisherSource");
@@ -533,6 +528,10 @@ public class micrortpsgen {
 				System.out.println("Generating Type definition files...");
 				if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + ".h", maintemplates.getTemplate("TypesHeader"), m_replace)) {
 					project.addCommonIncludeFile(onlyFileName + ".h");
+				}
+
+				if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + ".c", maintemplates.getTemplate("TypesSource"), m_replace)) {
+					project.addCommonSrcFile(onlyFileName + ".c");
 				}
 
                 if (ctx.existsLastStructure())
@@ -617,50 +616,50 @@ public class micrortpsgen {
 
 		final String METHOD_NAME = "genSolution";
 		boolean returnedValue = true;
-		if(m_atLeastOneStructure == true)
-		{
-			if (m_exampleOption != null) {
-				System.out.println("Generating solution for arch " + m_exampleOption + "...");
+//		if(m_atLeastOneStructure == true)
+//		{
+//			if (m_exampleOption != null) {
+//				System.out.println("Generating solution for arch " + m_exampleOption + "...");
+//
+//				if (m_exampleOption.substring(3, 6).equals("Win")) {
+//					System.out.println("Generating Windows solution");
+//
+//					if (m_exampleOption.startsWith("i86"))
+//					{
+//						if(m_exampleOption.charAt(m_exampleOption.length()-1) == '3')
+//							returnedValue = genVS(solution, null, "12");
+//						else
+//							returnedValue = genVS(solution, null, "14");
+//					} else if (m_exampleOption.startsWith("x64")) {
+//						for (int index = 0; index < m_vsconfigurations.length; index++) {
+//							m_vsconfigurations[index].setPlatform("x64");
+//						}
+//						if(m_exampleOption.charAt(m_exampleOption.length()-1) == '3')
+//							returnedValue = genVS(solution, "x64", "12");
+//						else
+//							returnedValue = genVS(solution, "x64", "14");
+//					} else {
+//						returnedValue = false;
+//					}
+//				} else if (m_exampleOption.substring(3, 8).equals("Linux")) {
+//					System.out.println("Generating makefile solution");
+//
+//					if (m_exampleOption.startsWith("i86")) {
+//						returnedValue = genMakefile(solution, "-m32");
+//					} else if (m_exampleOption.startsWith("x64")) {
+//						returnedValue = genMakefile(solution, "-m64");
+//					} else if (m_exampleOption.startsWith("arm")) {
+//						returnedValue = genMakefile(solution, "");
+//					} else {
+//						returnedValue = false;
+//					}
+//				}
+//			}
+//		}
+//		else
+//			System.out.println(ColorMessage.warning()+"No structure found in any of the provided IDL; no example files have been generated");
 
-				if (m_exampleOption.substring(3, 6).equals("Win")) {
-					System.out.println("Generating Windows solution");
-
-					if (m_exampleOption.startsWith("i86"))
-					{
-						if(m_exampleOption.charAt(m_exampleOption.length()-1) == '3')
-							returnedValue = genVS(solution, null, "12");
-						else
-							returnedValue = genVS(solution, null, "14");
-					} else if (m_exampleOption.startsWith("x64")) {
-						for (int index = 0; index < m_vsconfigurations.length; index++) {
-							m_vsconfigurations[index].setPlatform("x64");
-						}
-						if(m_exampleOption.charAt(m_exampleOption.length()-1) == '3')
-							returnedValue = genVS(solution, "x64", "12");
-						else
-							returnedValue = genVS(solution, "x64", "14");
-					} else {
-						returnedValue = false;
-					}
-				} else if (m_exampleOption.substring(3, 8).equals("Linux")) {
-					System.out.println("Generating makefile solution");
-
-					if (m_exampleOption.startsWith("i86")) {
-						returnedValue = genMakefile(solution, "-m32");
-					} else if (m_exampleOption.startsWith("x64")) {
-						returnedValue = genMakefile(solution, "-m64");
-					} else if (m_exampleOption.startsWith("arm")) {
-						returnedValue = genMakefile(solution, "");
-					} else {
-						returnedValue = false;
-					}
-				}
-			}
-		}
-		else
-			System.out.println(ColorMessage.warning()+"No structure found in any of the provided IDL; no example files have been generated");
-
-		return returnedValue;
+		return returnedValue = genCMakeLists(solution, "");
 	}
 
 	private boolean genVS(Solution solution, String arch, String vsVersion) {
@@ -803,6 +802,27 @@ public class micrortpsgen {
 
 		return returnedValue;
 	}
+
+    private boolean genCMakeLists(Solution solution, String arch) 
+    {
+        boolean returnedValue = false;
+        StringTemplate cmakelists = null;
+
+        StringTemplateGroup cmakeTemplates = StringTemplateGroup.loadGroup("cmakelists", DefaultTemplateLexer.class, null);
+
+        if (cmakeTemplates != null)
+        {
+            cmakelists = cmakeTemplates.getInstanceOf("cmakelists");
+
+            cmakelists.setAttribute("solution", solution);
+            cmakelists.setAttribute("example", m_exampleOption);
+            cmakelists.setAttribute("arch", arch);
+
+            returnedValue = Utils.writeFile(m_outputDir + "CMakeLists.txt", cmakelists, m_replace);
+        }
+        
+        return returnedValue;
+    }
 
 	String callPreprocessor(String idlFilename)
     {
