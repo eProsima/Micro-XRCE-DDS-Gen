@@ -1,3 +1,5 @@
+#include "IncludeType.idl"
+
 struct TestType {
     float               test_float;
     double              test_double;
@@ -11,4 +13,5 @@ struct TestType {
     boolean             test_boolean;
     octet               test_octet; 
     string              test_string;
+    IncludeType         include_type;
 };

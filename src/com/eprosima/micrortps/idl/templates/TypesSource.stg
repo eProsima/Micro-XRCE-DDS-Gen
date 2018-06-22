@@ -58,10 +58,8 @@ bool deserialize_$struct.name$_topic(MicroBuffer* reader, $struct.name$* topic)
     return reader->error == BUFFER_OK;
 }
 
-uint32_t size_of_$struct.name$_topic(const $struct.name$* topic)
+uint32_t size_of_$struct.name$_topic(const $struct.name$* topic, uint32_t size)
 {
-    uint32_t size = 0;
-
     $struct.members : { member|$serialized_size(ctx=ctx, object=member, data="topic", var="size")$};separator=""$
     return size;
 }
@@ -74,7 +72,7 @@ bool write_$struct.name$(Session* session, ObjectId datawriter_id, StreamId stre
     }
 
     bool result = false;
-    uint32_t topic_size = size_of_$struct.name$_topic(topic);
+    uint32_t topic_size = size_of_$struct.name$_topic(topic, 0);
     MicroBuffer* topic_buffer = NULL;
 
     if (128 > stream_id)

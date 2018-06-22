@@ -64,7 +64,7 @@ typedef struct $struct.name$
 
 bool serialize_$struct.name$_topic(MicroBuffer* writer, const $struct.name$* topic);
 bool deserialize_$struct.name$_topic(MicroBuffer* reader, $struct.name$* topic);
-uint32_t size_of_$struct.name$_topic(const $struct.name$* topic);
+uint32_t size_of_$struct.name$_topic(const $struct.name$* topic, uint32_t size);
 bool write_$struct.name$(Session* session, ObjectId datawriter_id, StreamId stream_id, $struct.name$* topic);
 >>
 

@@ -34,6 +34,10 @@ else()
     set(CMAKE_C_FLAGS "\${CMAKE_C_FLAGS} -pedantic -fstrict-aliasing -Wall -Wcast-align -Wshadow")
 endif()
 
+set(SRCS
+    $solution.projects : {$it.name$.c}; separator="\n"$
+    )
+
 $solution.projects : {$pub_sub_execs(project=it, libraries=solution.libraries)$}; separator="\n"$
 
 >>
@@ -41,11 +45,11 @@ $solution.projects : {$pub_sub_execs(project=it, libraries=solution.libraries)$}
 pub_sub_execs(project, libraries) ::= <<
 
 # $project.name$ Subscriber
-add_executable($project.name$Subscriber $project.name$Subscriber.c $project.name$.c)
+add_executable($project.name$Subscriber $project.name$Subscriber.c \${SRCS})
 target_link_libraries($project.name$Subscriber $solution.libraries : {$it$}; separator=" "$)
 
 # $project.name$ Publisher
-add_executable($project.name$Publisher $project.name$Publisher.c $project.name$.c)
+add_executable($project.name$Publisher $project.name$Publisher.c \${SRCS})
 target_link_libraries($project.name$Publisher micrortps_client)
 
 >>
