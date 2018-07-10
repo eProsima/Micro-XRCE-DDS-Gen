@@ -105,7 +105,7 @@ int main(int argc, char** argv)
     check_and_print_error(&my_session);
 
     ObjectId datawriter_id = {{$struct.name$_id, OBJK_DATAWRITER}};
-    create_publisher_sync_by_xml(&my_session, datawriter_id, datawriter_xml, publisher_id, false, false);
+    create_datawriter_sync_by_xml(&my_session, datawriter_id, datawriter_xml, publisher_id, false, false);
     check_and_print_error(&my_session);
 
     /* Main loop. */
