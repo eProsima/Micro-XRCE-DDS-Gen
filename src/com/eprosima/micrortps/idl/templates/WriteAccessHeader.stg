@@ -15,22 +15,23 @@
 group TypesHeader;
 
 main(ctx, definitions) ::= <<
-$fileHeader(file=[ctx.filename, ".h"], description=["This header file contains the declaration of the described types in the IDL file."])$
+$fileHeader(file=[ctx.filename, "Writer.h"], description=["This header file contains the write function of the described types in the IDL file."])$
 
-#ifndef _$ctx.filename;format="toUpper"$_H_
-#define _$ctx.filename;format="toUpper"$_H_
+#ifndef _$ctx.filename;format="toUpper"$_WRITER_H_
+#define _$ctx.filename;format="toUpper"$_WRITER_H_
 
 $if(ctx.printexception)$
 #include <$ctx.product$/exceptions/UserException.h>
 $endif$
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "$ctx.filename$.h"
+
+#include <micrortps/client/client.h>
 $ctx.directIncludeDependencies : {include | #include "$include$.h"}; separator="\n"$
 
 $definitions; separator="\n"$
 
-#endif // _$ctx.filename;format="toUpper"$_H_
+#endif // _$ctx.filename;format="toUpper"$_WRITER_H_
 >>
 
 // TODO name -> module
@@ -50,21 +51,7 @@ $typedefs : { typedef |typedef $typedef.typedefContentTypeCode.cTypename$ $typed
 >>
 
 struct_type(ctx, parent, struct, extensions) ::= <<
-/*!
- * @brief This struct represents the structure $struct.name$ defined by the user in the IDL file.
- * @ingroup $ctx.trimfilename$
- */
-typedef struct $struct.name$
-{
-    $struct.members:{$private_member_declaration(it)$}; separator="\n"$
-
-} $struct.name$;
-
-struct MicroBuffer;
-
-bool mr_serialize_$struct.name$_topic(struct MicroBuffer* writer, const $struct.name$* topic);
-bool mr_deserialize_$struct.name$_topic(struct MicroBuffer* reader, $struct.name$* topic);
-uint32_t mr_size_of_$struct.name$_topic(const $struct.name$* topic, uint32_t size);
+bool mr_write_$struct.name$_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id, const $struct.name$* topic);
 >>
 
 union_type(ctx, parent, union, extensions) ::= <<>>
@@ -85,8 +72,6 @@ $typecode.cTypename$ $name$[$typecode.dimensions$];
 $elseif(typecode.isType_e)$
 $typecode.cTypename$* $name$_data;
 uint32_t $name$_size;
-$elseif(typecode.isType_d)$
-$typecode.cTypename$ $name$[$typecode.maxsize$];
 $else$
 $typecode.cTypename$ $name$;
 $endif$
