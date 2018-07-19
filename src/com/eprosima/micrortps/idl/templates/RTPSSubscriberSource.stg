@@ -18,6 +18,13 @@ main(ctx, definitions) ::= <<
 $fileHeader(ctx=ctx,  file=[ctx.filename, "Subscriber.c"], description=["This file contains the implementation of the publisher functions."])$
 
 #include "$ctx.filename$.h"
+#include <micrortps/client/client.h>
+#include <string.h> //strcmp
+#include <stdlib.h> //atoi
+#include <stdio.h>
+
+#define STREAM_HISTORY  8
+#define BUFFER_SIZE     MR_CONFIG_UDP_TRANSPORT_MTU * STREAM_HISTORY
 
 $definitions; separator="\n"$
 
@@ -56,84 +63,83 @@ const_decl(ctx, parent, const) ::= <<>>
 typedef_decl(ctx, parent, typedefs) ::= <<>>
 
 struct_type(ctx, parent, struct) ::= <<
-const uint8_t $struct.name$_id = 0x01;
-
 const char* topic_xml = "<dds><topic>$if(ctx.lastStructure.typeCode.hasKey)$<kind>WITH_KEY</kind>$endif$<name>$ctx.filename$PubSubTopic</name><dataType>$struct.name$</dataType></topic></dds>";
 const char* subscriber_xml = "<subscriber name=\"MySubscriber\"";
 const char* datareader_xml = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>$if(ctx.lastStructure.typeCode.hasKey)$WITH_KEY$else$NO_KEY$endif$</kind><name>$ctx.filename$PubSubTopic</name><dataType>$struct.name$</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
 
-static void check_and_print_error(Session* session)
+void on_topic(mrSession* session, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct MicroBuffer* mb, void* args)
 {
-    if (session->last_status_received)
-    {
-        if (session->last_status.status != STATUS_OK)
-        {
-            printf("%sStatus error%s\n", "\x1B[1;31m", "\x1B[0m");
-        }
-    }
-    else
-    {
-        printf("%sConnection error%s\n", "\x1B[1;31m", "\x1B[0m");
-    }
+    (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) args;
+
+    $struct.name$ topic;
+    mr_deserialize_$struct.name$_topic(mb, &topic);
+
+    printf("Received topic");
 }
 
-void on_topic(ObjectId id, MicroBuffer* serialized_topic, void* args)
+int main(void)
 {
-    if ($struct.name$_id == id.data[0])
+    // Transport
+    mrUDPTransport transport;
+    if(!mr_init_udp_transport(&transport, "127.0.0.1", 2018))
     {
-        $struct.name$ topic;
-        deserialize_$struct.name$_topic(serialized_topic, &topic);
-
-        printf("Received topic");
-    }
-}
-
-int main(int argc, char** argv)
-{
-    /* Init session. */
-    Session my_session;
-    ClientKey key = {{0xAA, 0xBB, 0xCC, 0xDD}};
-    uint8_t ip[4] = {127, 0, 0, 1};
-    uint16_t port = 2019;
-    if (!new_udp_session(&my_session, 0x01, key, ip, port, on_topic, NULL))
-    {
+        printf("Error at create transport.\n");
         return 1;
     }
 
-    init_session_sync(&my_session);
-    check_and_print_error(&my_session);
-
-    /* Init XRCE object. */
-    ObjectId participant_id = {{0x00, OBJK_PARTICIPANT}};
-    create_participant_sync_by_ref(&my_session, participant_id, "default_participant", false, false);
-    check_and_print_error(&my_session);
-
-    ObjectId topic_id = {{0x00, OBJK_TOPIC}};
-    create_topic_sync_by_xml(&my_session, topic_id, topic_xml, participant_id, false, false);
-    check_and_print_error(&my_session);
-
-    ObjectId subscriber_id = {{$struct.name$_id, OBJK_SUBSCRIBER}};
-    create_subscriber_sync_by_xml(&my_session, subscriber_id, subscriber_xml, participant_id, false, false);
-    check_and_print_error(&my_session);
-
-    ObjectId datareader_id = {{$struct.name$_id, OBJK_DATAREADER}};
-    create_datareader_sync_by_xml(&my_session, datareader_id, datareader_xml, subscriber_id, false, false);
-    check_and_print_error(&my_session);
-
-    /* Main loop. */
-    while (true)
+    // Session
+    mrSession session;
+    mr_init_session(&session, &transport.comm, 0xCCCCDDDD);
+    mr_set_topic_callback(&session, on_topic, NULL);
+    if(!mr_create_session(&session))
     {
-        /* Request data. */
-        read_data_sync(&my_session, datareader_id, STREAMID_BUILTIN_RELIABLE);
-        check_and_print_error(&my_session);
-
-        run_communication(&my_session);
-
-        ms_sleep(1000);
+        printf("Error at create session.\n");
+        return 1;
     }
 
-    close_session_sync(&my_session);
-    free_session(&my_session);
+    // Streams
+    uint8_t output_reliable_stream_buffer[BUFFER_SIZE];
+    mrStreamId reliable_out = mr_create_output_reliable_stream(&session, output_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+
+    uint8_t input_reliable_stream_buffer[BUFFER_SIZE];
+    mrStreamId reliable_in = mr_create_input_reliable_stream(&session, input_reliable_stream_buffer, BUFFER_SIZE, STREAM_HISTORY);
+
+    // Create entities
+    mrObjectId participant_id = mr_object_id(0x01, MR_PARTICIPANT_ID);
+    uint16_t participant_req = mr_write_create_participant_ref(&session, reliable_out, participant_id, "default_participant", MR_REPLACE);
+
+    mrObjectId topic_id = mr_object_id(0x01, MR_TOPIC_ID);
+    uint16_t topic_req = mr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, MR_REPLACE);
+
+    mrObjectId subscriber_id = mr_object_id(0x01, MR_SUBSCRIBER_ID);
+    uint16_t subscriber_req = mr_write_configure_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, MR_REPLACE);
+
+    mrObjectId datareader_id = mr_object_id(0x01, MR_DATAREADER_ID);
+    uint16_t datareader_req = mr_write_configure_datareader_xml(&session, reliable_out, datareader_id, subscriber_id, datareader_xml, MR_REPLACE);
+
+    // Send create entities message and wait its status
+    uint8_t status[4];
+    uint16_t requests[4] = {participant_req, topic_req, subscriber_req, datareader_req};
+    if(!mr_run_session_until_status(&session, 1000, requests, status, 4))
+    {
+        printf("Error at create entities: participant: %i topic: %i subscriber: %i datareader: %i\n", status[0], status[1], status[2], status[3]);
+        return 1;
+    }
+
+    // Request topics
+    mrDeliveryControl delivery_control = {0};
+    delivery_control.max_samples = MR_MAX_SAMPLES_UNLIMITED;
+    uint16_t read_data_req = mr_write_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
+
+    // Read topics
+    while(true)
+    {
+        uint8_t read_data_status;
+        (void) mr_run_session_until_status(&session, MR_TIMEOUT_INF, &read_data_req, &read_data_status, 1);
+    }
+
+    // Delete resources
+    mr_delete_session(&session);
 
     return 0;
 }

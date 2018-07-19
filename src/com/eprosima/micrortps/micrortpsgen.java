@@ -394,7 +394,7 @@ public class micrortpsgen {
         System.out.println("\twhere the options are:");
         System.out.println("\t\t-help: shows this help");
         System.out.println("\t\t-version: shows the current version of eProsima Micro RTPS.");
-        System.out.println("\t\t-write-access-profile <platform>: Generates a write function for the topic.");
+        System.out.println("\t\t-write-access-profile: Generates a write function for the topic.");
         System.out.println("\t\t-example <platform>: Generates a solution for a specific platform (example: x64Win64VS2015)");
         System.out.println("\t\t\tSupported platforms:");
         for(int count = 0; count < m_platforms.size(); ++count)
@@ -550,7 +550,7 @@ public class micrortpsgen {
                     m_atLeastOneStructure = true;
                     project.setHasStruct(true);
 
-                    if (write_access_profile_enabled)
+                    if (m_exampleOption != null || write_access_profile_enabled)
                     {
                         System.out.println("Generating Write Access profile files...");
                         if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + "Writer.h", maintemplates.getTemplate("WriteAccessHeader"), m_replace)) {
