@@ -20,15 +20,15 @@ import java.util.ArrayList;
 
 public class Solution extends com.eprosima.solution.Solution
 {
-    public Solution(micrortpsgen.LANGUAGE language, String example, String version, boolean serverside, boolean clientside)
+    public Solution(micrortpsgen.LANGUAGE language, String version, boolean serverside, boolean clientside)
     {
         super();
 
         m_publisherside = serverside;
         m_subscriberside = clientside;
         m_version = version;
-        m_example = example;
         m_language = language;
+        m_os = System.getProperty("os.name");
     }
 
     public boolean getPublisherside()
@@ -49,7 +49,7 @@ public class Solution extends com.eprosima.solution.Solution
 
         for(int count = 0; count < libraries.size(); ++count)
         {
-            if(m_example.contains("Win") && libraries.get(count).startsWith("micrortps"))
+            if(m_os.contains("Windows") && libraries.get(count).startsWith("micrortps"))
                 ret.add(libraries.get(count) + "-" + m_version);
             else
                 ret.add(libraries.get(count));
@@ -65,7 +65,7 @@ public class Solution extends com.eprosima.solution.Solution
 
         for(int count = 0; count < libraries.size(); ++count)
         {
-            if(m_example.contains("Win") && libraries.get(count).startsWith("micrortps"))
+            if(m_os.contains("Windows") && libraries.get(count).startsWith("micrortps"))
                 ret.add(libraries.get(count) + "d-" + m_version);
             else
                 ret.add(libraries.get(count) + "d");
@@ -81,9 +81,7 @@ public class Solution extends com.eprosima.solution.Solution
 
         for(int count = 0; count < libraries.size(); ++count)
         {
-            if(libraries.get(count).startsWith("ndds"))
-                ret.add(libraries.get(count) + "z");
-            else if(m_example.contains("Win") && libraries.get(count).startsWith("micrortps"))
+            if(m_os.contains("Windows") && libraries.get(count).startsWith("micrortps"))
                 ret.add("lib" + libraries.get(count) + "-" + m_version);
             else
                 ret.add("lib" + libraries.get(count));
@@ -99,9 +97,7 @@ public class Solution extends com.eprosima.solution.Solution
 
         for(int count = 0; count < libraries.size(); ++count)
         {
-            if(libraries.get(count).startsWith("ndds"))
-                ret.add(libraries.get(count) + "zd");
-            else if(m_example.contains("Win") && libraries.get(count).startsWith("micrortps"))
+            if(m_os.contains("Windows") && libraries.get(count).startsWith("micrortps"))
                 ret.add("lib" + libraries.get(count) + "d-" + m_version);
             else
                 ret.add("lib" + libraries.get(count) + "d");
@@ -118,6 +114,6 @@ public class Solution extends com.eprosima.solution.Solution
     private boolean m_publisherside = true;
     private boolean m_subscriberside = true;
     private String m_version = null;
-    private String m_example = null;
+    private String m_os = null;
     private micrortpsgen.LANGUAGE m_language = micrortpsgen.LANGUAGE.C; // Default language -> C
 }

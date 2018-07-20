@@ -14,7 +14,7 @@
 
 group CMakeLists;
 
-cmakelists(solution, example, arch) ::= <<
+cmakelists(solution, arch) ::= <<
 
 cmake_minimum_required(VERSION 2.8.12)
 if (\${CMAKE_VERSION} VERSION_GREATER 3.0)

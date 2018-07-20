@@ -73,11 +73,9 @@ public class micrortpsgen {
      * Attributes
      */
 
-    private static ArrayList<String> m_platforms = null;
-
     private Vector<String> m_idlFiles;
     protected static String m_appEnv = "MICRORTPSHOME";
-    private String m_exampleOption = null;
+    private boolean m_exampleOption = false;
     private boolean write_access_profile_enabled = false;
     private boolean m_ppDisable = false; //TODO
     private boolean m_replace = false;
@@ -146,14 +144,7 @@ public class micrortpsgen {
                 m_idlFiles.add(arg);
             }
             else if (arg.equals("-example")) {
-                if (count < args.length) {
-                    m_exampleOption = args[count++];
-                    if (!m_platforms.contains(m_exampleOption)) {
-                        throw new BadArgumentException("Unknown example arch " + m_exampleOption);
-                    }
-                } else {
-                    throw new BadArgumentException("No architecture speficied after -example argument");
-                }
+                m_exampleOption = true;
             }
             else if (arg.equals("-write-access-profile")) {
                 write_access_profile_enabled = true;
@@ -273,7 +264,7 @@ public class micrortpsgen {
 
         if (returnedValue)
         {
-            Solution solution = new Solution(m_languageOption, m_exampleOption, getVersion(), m_publishercode, m_subscribercode);
+            Solution solution = new Solution(m_languageOption, getVersion(), m_publishercode, m_subscribercode);
 
             // Load string templates
             System.out.println("Loading templates...");
@@ -284,18 +275,6 @@ public class micrortpsgen {
             {
                 solution.addInclude("$(" + m_appEnv + ")/include");
                 solution.addLibraryPath("$(" + m_appEnv + ")/lib");
-                if(m_exampleOption != null) {
-                    solution.addLibraryPath("$(" + m_appEnv + ")/lib/" + m_exampleOption);
-                }
-            }
-
-            // If Java, include jni headers
-            if(m_languageOption == LANGUAGE.JAVA)
-            {
-                solution.addInclude("$(JAVA_HOME)/include");
-
-                if(m_exampleOption != null && m_exampleOption.contains("Linux"))
-                    solution.addInclude("$(JAVA_HOME)/include/linux");
             }
 
             // Add product library
@@ -312,7 +291,7 @@ public class micrortpsgen {
             }
 
             // Generate solution
-            if (returnedValue && m_exampleOption != null) {
+            if (returnedValue && m_exampleOption) {
                 if ((returnedValue = genSolution(solution)) == false) {
                     System.out.println(ColorMessage.error() + "While the solution was being generated");
                 }
@@ -322,42 +301,6 @@ public class micrortpsgen {
 
         return returnedValue;
 
-    }
-
-
-
-
-    /*
-     * ----------------------------------------------------------------------------------------
-     *
-     * Auxiliary methods
-     */
-
-    public static boolean loadPlatforms() {
-
-        boolean returnedValue = false;
-
-        micrortpsgen.m_platforms = new ArrayList<String>();
-
-        try {
-
-            InputStream input = micrortpsgen.class.getClassLoader().getResourceAsStream("platforms"); // TODO Modificar esto antes de exportarlo
-            InputStreamReader ir = new InputStreamReader(input);
-            BufferedReader reader = new BufferedReader(ir);
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                micrortpsgen.m_platforms.add(line);
-            }
-
-            returnedValue = true;
-
-        } catch (Exception e) {
-
-            System.out.println(ColorMessage.error() + "Getting platforms. " + e.getMessage());
-
-        }
-
-        return returnedValue;
     }
 
     private String getVersion()
@@ -395,11 +338,7 @@ public class micrortpsgen {
         System.out.println("\t\t-help: shows this help");
         System.out.println("\t\t-version: shows the current version of eProsima Micro RTPS.");
         System.out.println("\t\t-write-access-profile: Generates a write function for the topic.");
-        System.out.println("\t\t-example <platform>: Generates a solution for a specific platform (example: x64Win64VS2015)");
-        System.out.println("\t\t\tSupported platforms:");
-        for(int count = 0; count < m_platforms.size(); ++count)
-            System.out.println("\t\t\t * " + m_platforms.get(count));
-        //System.out.println("\t\t-language <C++>: Programming language (default: C++).");
+        System.out.println("\t\t-example: Generates an example.");
         System.out.println("\t\t-replace: replaces existing generated files.");
         System.out.println("\t\t-ppDisable: disables the preprocessor.");
         System.out.println("\t\t-ppPath: specifies the preprocessor path.");
@@ -550,7 +489,7 @@ public class micrortpsgen {
                     m_atLeastOneStructure = true;
                     project.setHasStruct(true);
 
-                    if (m_exampleOption != null || write_access_profile_enabled)
+                    if (m_exampleOption || write_access_profile_enabled)
                     {
                         System.out.println("Generating Write Access profile files...");
                         if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + "Writer.h", maintemplates.getTemplate("WriteAccessHeader"), m_replace)) {
@@ -562,7 +501,7 @@ public class micrortpsgen {
                         }
                     }
 
-                    if (m_exampleOption != null)
+                    if (m_exampleOption)
                     {
                         System.out.println("Generating Publisher files...");
                         if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + "Publisher.c", maintemplates.getTemplate("RTPSPublisherSource"), m_replace))
@@ -635,195 +574,9 @@ public class micrortpsgen {
         return returnedValue ? project : null;
     }
 
-    private boolean genSolution(Solution solution) {
-
-        final String METHOD_NAME = "genSolution";
-        boolean returnedValue = true;
-        //		if(m_atLeastOneStructure == true)
-        //		{
-        //			if (m_exampleOption != null) {
-        //				System.out.println("Generating solution for arch " + m_exampleOption + "...");
-        //
-        //				if (m_exampleOption.substring(3, 6).equals("Win")) {
-        //					System.out.println("Generating Windows solution");
-        //
-        //					if (m_exampleOption.startsWith("i86"))
-        //					{
-        //						if(m_exampleOption.charAt(m_exampleOption.length()-1) == '3')
-        //							returnedValue = genVS(solution, null, "12");
-        //						else
-        //							returnedValue = genVS(solution, null, "14");
-        //					} else if (m_exampleOption.startsWith("x64")) {
-        //						for (int index = 0; index < m_vsconfigurations.length; index++) {
-        //							m_vsconfigurations[index].setPlatform("x64");
-        //						}
-        //						if(m_exampleOption.charAt(m_exampleOption.length()-1) == '3')
-        //							returnedValue = genVS(solution, "x64", "12");
-        //						else
-        //							returnedValue = genVS(solution, "x64", "14");
-        //					} else {
-        //						returnedValue = false;
-        //					}
-        //				} else if (m_exampleOption.substring(3, 8).equals("Linux")) {
-        //					System.out.println("Generating makefile solution");
-        //
-        //					if (m_exampleOption.startsWith("i86")) {
-        //						returnedValue = genMakefile(solution, "-m32");
-        //					} else if (m_exampleOption.startsWith("x64")) {
-        //						returnedValue = genMakefile(solution, "-m64");
-        //					} else if (m_exampleOption.startsWith("arm")) {
-        //						returnedValue = genMakefile(solution, "");
-        //					} else {
-        //						returnedValue = false;
-        //					}
-        //				}
-        //			}
-        //		}
-        //		else
-        //			System.out.println(ColorMessage.warning()+"No structure found in any of the provided IDL; no example files have been generated");
-
-        return returnedValue = genCMakeLists(solution, "");
-    }
-
-    private boolean genVS(Solution solution, String arch, String vsVersion) {
-
-        final String METHOD_NAME = "genVS";
-        boolean returnedValue = false;
-
-        StringTemplateGroup vsTemplates = StringTemplateGroup.loadGroup("VS", DefaultTemplateLexer.class, null);
-
-        if (vsTemplates != null)
-        {
-            StringTemplate tsolution = vsTemplates.getInstanceOf("solution");
-            StringTemplate tproject = vsTemplates.getInstanceOf("project");
-            StringTemplate tprojectFiles = vsTemplates.getInstanceOf("projectFiles");
-            StringTemplate tprojectPubSub = vsTemplates.getInstanceOf("projectPubSub");
-            StringTemplate tprojectFilesPubSub = vsTemplates.getInstanceOf("projectFilesPubSub");
-            StringTemplate tprojectJNI = null;
-            StringTemplate tprojectFilesJNI = null;
-            if(m_languageOption == LANGUAGE.JAVA)
-            {
-                tprojectJNI = vsTemplates.getInstanceOf("projectJNI");
-                tprojectFilesJNI = vsTemplates.getInstanceOf("projectFilesJNI");
-            }
-
-            returnedValue = true;
-
-            for (int count = 0; returnedValue && (count < solution.getProjects().size()); ++count) {
-                Project project = (Project) solution.getProjects().get(count);
-
-                tproject.setAttribute("solution", solution);
-                tproject.setAttribute("project", project);
-                tproject.setAttribute("example", m_exampleOption);
-                tproject.setAttribute("vsVersion",  vsVersion);
-
-                tprojectFiles.setAttribute("project", project);
-                tprojectFiles.setAttribute("vsVersion", vsVersion);
-
-                tprojectPubSub.setAttribute("solution", solution);
-                tprojectPubSub.setAttribute("project", project);
-                tprojectPubSub.setAttribute("example", m_exampleOption);
-                tprojectPubSub.setAttribute("vsVersion", vsVersion);
-
-                tprojectFilesPubSub.setAttribute("project", project);
-                tprojectFilesPubSub.setAttribute("vsVersion", vsVersion);
-
-                if(m_languageOption == LANGUAGE.JAVA)
-                {
-                    tprojectJNI.setAttribute("solution", solution);
-                    tprojectJNI.setAttribute("project", project);
-                    tprojectJNI.setAttribute("example", m_exampleOption);
-                    tprojectJNI.setAttribute("vsVersion", vsVersion);
-
-                    tprojectFilesJNI.setAttribute("project", project);
-                }
-
-                for (int index = 0; index < m_vsconfigurations.length; index++) {
-                    tproject.setAttribute("configurations", m_vsconfigurations[index]);
-                    tprojectPubSub.setAttribute("configurations", m_vsconfigurations[index]);
-                    if(m_languageOption == LANGUAGE.JAVA)
-                    {
-                        tprojectJNI.setAttribute("configurations", m_vsconfigurations[index]);
-                    }
-                }
-
-                if (returnedValue = Utils.writeFile(m_outputDir + project.getName() + "Types-" + m_exampleOption + ".vcxproj", tproject, m_replace)) {
-                    if (returnedValue = Utils.writeFile(m_outputDir + project.getName() + "Types-" + m_exampleOption + ".vcxproj.filters", tprojectFiles, m_replace)) {
-                        if(project.getHasStruct())
-                        {
-                            if (returnedValue = Utils.writeFile(m_outputDir + project.getName() + "PublisherSubscriber-" + m_exampleOption + ".vcxproj", tprojectPubSub, m_replace)) {
-                                returnedValue = Utils.writeFile(m_outputDir + project.getName() + "PublisherSubscriber-" + m_exampleOption + ".vcxproj.filters", tprojectFilesPubSub, m_replace);
-                            }
-                        }
-                    }
-                }
-
-                if(returnedValue && m_languageOption == LANGUAGE.JAVA)
-                {
-                    if(returnedValue = Utils.writeFile(m_outputDir + project.getName() + "PubSubJNI-" + m_exampleOption + ".vcxproj", tprojectJNI, m_replace))
-                    {
-                        returnedValue = Utils.writeFile(m_outputDir + project.getName() + "PubSubJNI-" + m_exampleOption + ".vcxproj.filters", tprojectFilesJNI, m_replace);
-                    }
-                }
-
-                tproject.reset();
-                tprojectFiles.reset();
-                tprojectPubSub.reset();
-                tprojectFilesPubSub.reset();
-                if(m_languageOption == LANGUAGE.JAVA)
-                {
-                    tprojectJNI.reset();
-                    tprojectFilesJNI.reset();
-                }
-
-            }
-
-            if (returnedValue) {
-                tsolution.setAttribute("solution", solution);
-                tsolution.setAttribute("example", m_exampleOption);
-
-                // Project configurations
-                for (int index = 0; index < m_vsconfigurations.length; index++) {
-                    tsolution.setAttribute("configurations", m_vsconfigurations[index]);
-                }
-
-                if(m_languageOption == LANGUAGE.JAVA)
-                    tsolution.setAttribute("generateJava", true);
-
-                String vsVersion_sol = "2013";
-                if(vsVersion.equals("14"))
-                    vsVersion_sol = "2015";
-                tsolution.setAttribute("vsVersion", vsVersion_sol);
-
-                returnedValue = Utils.writeFile(m_outputDir + "solution-" + m_exampleOption + ".sln", tsolution, m_replace);
-            }
-
-        } else {
-            System.out.println("ERROR<" + METHOD_NAME + ">: Cannot load the template group VS2013");
-        }
-
-        return returnedValue;
-    }
-
-    private boolean genMakefile(Solution solution, String arch) {
-
-        boolean returnedValue = false;
-        StringTemplate makecxx = null;
-
-        StringTemplateGroup makeTemplates = StringTemplateGroup.loadGroup("makefile", DefaultTemplateLexer.class, null);
-
-        if (makeTemplates != null) {
-            makecxx = makeTemplates.getInstanceOf("makecxx");
-
-            makecxx.setAttribute("solution", solution);
-            makecxx.setAttribute("example", m_exampleOption);
-            makecxx.setAttribute("arch", arch);
-
-            //returnedValue = Utils.writeFile(m_outputDir + "makefile_" + m_exampleOption, makecxx, m_replace);
-            returnedValue = true;
-        }
-
-        return returnedValue;
+    private boolean genSolution(Solution solution)
+    {
+        return genCMakeLists(solution, "");
     }
 
     private boolean genCMakeLists(Solution solution, String arch)
@@ -838,7 +591,6 @@ public class micrortpsgen {
             cmakelists = cmakeTemplates.getInstanceOf("cmakelists");
 
             cmakelists.setAttribute("solution", solution);
-            cmakelists.setAttribute("example", m_exampleOption);
             cmakelists.setAttribute("arch", arch);
 
             returnedValue = Utils.writeFile(m_outputDir + "CMakeLists.txt", cmakelists, m_replace);
@@ -1070,21 +822,17 @@ public class micrortpsgen {
     public static void main(String[] args) {
         ColorMessage.load();
 
-        if(loadPlatforms()) {
+        try {
 
-            try {
-
-                micrortpsgen main = new micrortpsgen(args);
-                if (main.execute()) {
-                    System.exit(0);
-                }
-
-            } catch (BadArgumentException e) {
-
-                System.out.println(ColorMessage.error("BadArgumentException") + e.getMessage());
-                printHelp();
-
+            micrortpsgen main = new micrortpsgen(args);
+            if (main.execute()) {
+                System.exit(0);
             }
+
+        } catch (BadArgumentException e) {
+
+            System.out.println(ColorMessage.error("BadArgumentException") + e.getMessage());
+            printHelp();
 
         }
 

@@ -31,13 +31,9 @@ task buildIDLParser(type: GradleBuild) {
 }
 
 task copyResources {
-    // Copy platforms file
+    // Create directory
     File outputDir = file(new File(buildDir, "resources/main"))
     outputDir.exists() || outputDir.mkdirs()
-    project.copy {
-        from(file(new File(projectDir, 'resources/platforms')))
-        into(outputDir)
-    }
 
     // Create version file
     Properties pversion = new Properties()
