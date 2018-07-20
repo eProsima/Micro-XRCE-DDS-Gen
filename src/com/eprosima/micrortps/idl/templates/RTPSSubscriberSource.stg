@@ -72,7 +72,7 @@ int main(void)
 
     // Create entities
     mrObjectId participant_id = mr_object_id(0x01, MR_PARTICIPANT_ID);
-    uint16_t participant_req = mr_write_create_participant_ref(&session, reliable_out, participant_id, "default_participant", MR_REPLACE);
+    uint16_t participant_req = mr_write_create_participant_ref(&session, reliable_out, participant_id, "default participant", MR_REPLACE);
 
     mrObjectId topic_id = mr_object_id(0x01, MR_TOPIC_ID);
     uint16_t topic_req = mr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, MR_REPLACE);
