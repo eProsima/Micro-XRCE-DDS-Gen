@@ -33,9 +33,14 @@ $definitions; separator="\n"$
 #endif // _$ctx.filename;format="toUpper"$_H_
 >>
 
-// TODO name -> module
-module(ctx, parent, module, definition_list) ::= <<>>
-definition_list(definitions) ::= <<>>
+module(ctx, parent, module, definition_list) ::= <<
+$definition_list$
+>>
+
+definition_list(definitions) ::= <<
+$definitions; separator="\n"$
+>>
+
 annotation(ctx, annotation) ::= <<>>
 interface(ctx, parent, interface, export_list) ::= <<>>
 export_list(exports) ::= <<>>
@@ -51,20 +56,20 @@ $typedefs : { typedef |typedef $typedef.typedefContentTypeCode.cTypename$ $typed
 
 struct_type(ctx, parent, struct, extensions) ::= <<
 /*!
- * @brief This struct represents the structure $struct.name$ defined by the user in the IDL file.
+ * @brief This struct represents the structure $struct.cScopedname$ defined by the user in the IDL file.
  * @ingroup $ctx.trimfilename$
  */
-typedef struct $struct.name$
+typedef struct $struct.cScopedname$
 {
     $struct.members:{$private_member_declaration(it)$}; separator="\n"$
 
-} $struct.name$;
+} $struct.cScopedname$;
 
 struct MicroBuffer;
 
-bool mr_serialize_$struct.name$_topic(struct MicroBuffer* writer, const $struct.name$* topic);
-bool mr_deserialize_$struct.name$_topic(struct MicroBuffer* reader, $struct.name$* topic);
-uint32_t mr_size_of_$struct.name$_topic(const $struct.name$* topic, uint32_t size);
+bool $struct.cScopedname$_serialize_topic(struct MicroBuffer* writer, const $struct.cScopedname$* topic);
+bool $struct.cScopedname$_deserialize_topic(struct MicroBuffer* reader, $struct.cScopedname$* topic);
+uint32_t $struct.cScopedname$_size_of_topic(const $struct.cScopedname$* topic, uint32_t size);
 >>
 
 union_type(ctx, parent, union, extensions) ::= <<>>

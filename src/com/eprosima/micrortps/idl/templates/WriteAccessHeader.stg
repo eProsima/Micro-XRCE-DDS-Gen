@@ -35,8 +35,14 @@ $definitions; separator="\n"$
 >>
 
 // TODO name -> module
-module(ctx, parent, module, definition_list) ::= <<>>
-definition_list(definitions) ::= <<>>
+module(ctx, parent, module, definition_list) ::= <<
+$definition_list$
+>>
+
+definition_list(definitions) ::= <<
+$definitions; separator="\n"$
+>>
+
 annotation(ctx, annotation) ::= <<>>
 interface(ctx, parent, interface, export_list) ::= <<>>
 export_list(exports) ::= <<>>
@@ -51,7 +57,8 @@ $typedefs : { typedef |typedef $typedef.typedefContentTypeCode.cTypename$ $typed
 >>
 
 struct_type(ctx, parent, struct, extensions) ::= <<
-bool mr_write_$struct.name$_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id, const $struct.name$* topic);
+bool mr_write_$struct.cScopedname$_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id,
+        const $struct.cScopedname$* topic);
 >>
 
 union_type(ctx, parent, union, extensions) ::= <<>>

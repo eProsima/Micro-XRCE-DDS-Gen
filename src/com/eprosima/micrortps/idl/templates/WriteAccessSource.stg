@@ -26,9 +26,13 @@ $definitions; separator="\n"$
 
 >>
 
-module(ctx, parent, module, definition_list) ::= <<>>
+module(ctx, parent, module, definition_list) ::= <<
+$definition_list$
+>>
 
-definition_list(definitions) ::= <<>>
+definition_list(definitions) ::= <<
+$definitions; separator="\n"$
+>>
 
 annotation(ctx, annotation) ::= <<>>
 
@@ -49,11 +53,12 @@ const_decl(ctx, parent, const) ::= <<>>
 typedef_decl(ctx, parent, typedefs) ::= <<>>
 
 struct_type(ctx, parent, struct, extensions) ::= <<
-bool mr_write_$struct.name$_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id, const $struct.name$* topic)
+bool mr_write_$struct.cScopedname$_topic(mrSession* session, mrStreamId stream_id, mrObjectId datawriter_id, const
+        $struct.cScopedname$* topic)
 {
     bool written = false;
 
-    uint32_t topic_length = mr_size_of_$struct.name$_topic(topic, 0);
+    uint32_t topic_length = $struct.cScopedname$_size_of_topic(topic, 0);
     uint32_t payload_length = 0;
     payload_length += 4; //request_id + object_id
     payload_length += 4; //topic_length (remove in future version to be compliant)
@@ -70,7 +75,7 @@ bool mr_write_$struct.name$_topic(mrSession* session, mrStreamId stream_id, mrOb
 
         MicroBuffer mb_topic;
         init_micro_buffer(&mb_topic, mb.iterator, topic_length);
-        (void) mr_serialize_$struct.name$_topic(&mb_topic, topic);
+        (void) $struct.cScopedname$_serialize_topic(&mb_topic, topic);
 
         written = true;
     }
