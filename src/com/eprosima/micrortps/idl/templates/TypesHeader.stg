@@ -20,6 +20,11 @@ $fileHeader(file=[ctx.filename, ".h"], description=["This header file contains t
 #ifndef _$ctx.filename;format="toUpper"$_H_
 #define _$ctx.filename;format="toUpper"$_H_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 $if(ctx.printexception)$
 #include <$ctx.product$/exceptions/UserException.h>
 $endif$
@@ -29,6 +34,9 @@ $endif$
 $ctx.directIncludeDependencies : {include | #include "$include$.h"}; separator="\n"$
 
 $definitions; separator="\n"$
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _$ctx.filename;format="toUpper"$_H_
 >>

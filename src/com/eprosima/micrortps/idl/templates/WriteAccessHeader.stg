@@ -20,6 +20,11 @@ $fileHeader(file=[ctx.filename, "Writer.h"], description=["This header file cont
 #ifndef _$ctx.filename;format="toUpper"$_WRITER_H_
 #define _$ctx.filename;format="toUpper"$_WRITER_H_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 $if(ctx.printexception)$
 #include <$ctx.product$/exceptions/UserException.h>
 $endif$
@@ -30,6 +35,9 @@ $endif$
 $ctx.directIncludeDependencies : {include | #include "$include$.h"}; separator="\n"$
 
 $definitions; separator="\n"$
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _$ctx.filename;format="toUpper"$_WRITER_H_
 >>
