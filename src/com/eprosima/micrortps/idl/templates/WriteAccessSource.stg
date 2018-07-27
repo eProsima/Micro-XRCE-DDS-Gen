@@ -66,7 +66,7 @@ bool mr_write_$struct.cScopedname$_topic(mrSession* session, mrStreamId stream_i
     MicroBuffer mb;
     if(prepare_stream_to_write(&session->streams, stream_id, payload_length + topic_length + SUBHEADER_SIZE, &mb))
     {
-        (void) write_submessage_header(&mb, SUBMESSAGE_ID_WRITE_DATA, payload_length + topic_length, FORMAT_DATA);
+        (void) write_submessage_header(&mb, SUBMESSAGE_ID_WRITE_DATA, (uint16_t)(payload_length + topic_length), FORMAT_DATA);
 
         WRITE_DATA_Payload_Data payload;
         init_base_object_request(session, datawriter_id, &payload.base);
