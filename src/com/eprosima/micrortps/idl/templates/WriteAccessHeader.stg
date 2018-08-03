@@ -75,22 +75,7 @@ enum_type(ctx, parent, enum) ::= <<>>
 /***** Utils *****/
 
 public_member_declaration(member) ::= <<>>
-
-private_member_declaration(member) ::= <<
-$private_declaration(typecode=member.typecode, name=member.name)$>>
-
+private_member_declaration(member) ::= <<>>
 public_unionmember_declaration(member) ::= <<>>
-
-private_declaration(typecode, name) ::= <<
-$if(typecode.isType_f)$
-$typecode.cTypename$ $name$[$typecode.dimensions$];
-$elseif(typecode.isType_e)$
-$typecode.cTypename$* $name$_data;
-uint32_t $name$_size;
-$else$
-$typecode.cTypename$ $name$;
-$endif$
->>
-
 size_functions(type) ::= <<>>
 serialization_functions(type) ::= <<>>

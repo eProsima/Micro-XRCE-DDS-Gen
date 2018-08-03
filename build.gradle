@@ -77,23 +77,16 @@ task testCodeGen(type: JavaExec) {
     outputDir.exists() || outputDir.mkdirs()
 
     workingDir './'
-    
-    String platform
-    if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
-        platform = 'x64Linux2.6gcc'
-    } else {
-        platform = 'x64Win64VS2015'
-    }
 
     main = '-jar';
     args = [
         'share/micrortps/micrortpsgen.jar',
-        'test/test.idl',
         '-replace',
         '-example',
-        platform,
-	'-d',
-	outputDir,
-	'-ppDisable'
+        '-write-access-profile',
+        'test/IncludeType.idl',
+        'test/TestType.idl',
+        '-d',
+        outputDir,
     ]
 }

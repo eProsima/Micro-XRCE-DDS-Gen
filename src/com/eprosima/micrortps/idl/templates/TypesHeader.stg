@@ -96,8 +96,8 @@ private_declaration(typecode, name) ::= <<
 $if(typecode.isType_f)$
 $typecode.cTypename$ $name$[$typecode.dimensions$];
 $elseif(typecode.isType_e)$
-$typecode.cTypename$* $name$_data;
 uint32_t $name$_size;
+$typecode.cTypename$ $name$_data[$typecode.maxsize$];
 $elseif(typecode.isType_d)$
 $typecode.cTypename$ $name$[$typecode.maxsize$];
 $else$
