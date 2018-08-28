@@ -103,7 +103,6 @@ public class micrortpsgen {
         new VSConfiguration("Release", "Win32", false, false)};
 
     private String m_os = null;
-    private boolean m_local = false;
     private boolean fusion_ = false;
 
     //! Default package used in Java files.
@@ -201,10 +200,6 @@ public class micrortpsgen {
             } else if (arg.equals("-help")) {
                 printHelp();
                 System.exit(0);
-            }
-            else if(arg.equals("-local"))
-            {
-                m_local = true;
             }
             else if(arg.equals("-fusion"))
             {

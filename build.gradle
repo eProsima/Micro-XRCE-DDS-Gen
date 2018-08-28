@@ -76,8 +76,6 @@ task testCodeGen(type: JavaExec) {
     File outputDir = file("${project.buildDir}/test")
     outputDir.exists() || outputDir.mkdirs()
 
-    workingDir './'
-
     main = '-jar';
     args = [
         'share/micrortps/micrortpsgen.jar',
