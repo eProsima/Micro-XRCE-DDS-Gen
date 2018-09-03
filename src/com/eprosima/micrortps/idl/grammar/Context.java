@@ -25,20 +25,13 @@ import com.eprosima.micrortps.idl.parser.typecode.StructTypeCode;
 
 public class Context extends com.eprosima.idl.context.Context implements com.eprosima.micrortps.idl.context.Context
 {
-    // TODO Remove middleware parameter. It is temporal while cdr and rest don't have async functions.
-    public Context(String filename, String file, ArrayList includePaths, boolean subscribercode, boolean publishercode,
-            String appProduct)
+    public Context(String filename, String file, ArrayList<String> includePaths, boolean subscribercode, boolean publishercode)
     {
         super(filename, file, includePaths);
         m_fileNameUpper = filename.toUpperCase();
         m_subscribercode = subscribercode;
         m_publishercode = publishercode;
         m_randomGenNames = new Stack<String>();
-
-        // TODO Remove
-        m_appProduct = appProduct;
-        //m_protocol = protocol;
-        //m_ddstypes = ddstypes;
     }
 
     public void setTypelimitation(String lt)
@@ -140,22 +133,12 @@ public class Context extends com.eprosima.idl.context.Context implements com.epr
         return true;
     }
 
-    public boolean isFastcdr()
-    {
-        return activateFusion_;
-    }
-
     public boolean isAnyCdr()
     {
         return true;
     }
 
     /*** End ***/
-
-    public void setActivateFusion(boolean value)
-    {
-        activateFusion_ = value;
-    }
 
     //// Java block ////
     public void setPackage(String pack)
@@ -196,11 +179,6 @@ public class Context extends com.eprosima.idl.context.Context implements com.epr
 
     private String m_typelimitation = null;
 
-    //! Cache the first interface.
-    private Interface m_firstinterface = null;
-    //! Cache the first exception.
-    private com.eprosima.idl.parser.tree.Exception m_firstexception = null;
-
     // TODO Lleva la cuenta de generacion de nuevos nombres.
     private int m_randomGenName = 0;
     private Stack<String> m_randomGenNames = null;
@@ -211,9 +189,6 @@ public class Context extends com.eprosima.idl.context.Context implements com.epr
     private boolean m_subscribercode = true;
     // Stores if the user will generate the server source.
     private boolean m_publishercode = true;
-
-    // TODO Remove
-    private String m_appProduct = null;
 
     private TypeDeclaration m_lastStructure = null;
 
@@ -282,7 +257,6 @@ public class Context extends com.eprosima.idl.context.Context implements com.epr
     private String m_onlypackage = "";
     // Java package dir.
     private String m_packageDir = "";
-    private boolean activateFusion_ = false;
     //// End Java block
 
 }

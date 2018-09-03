@@ -1,0 +1,31 @@
+struct Custom
+{
+    long a;
+    long b;
+};
+
+struct S1
+{
+	boolean aboolean;
+	char achar;
+	double adouble;
+	float afloat;
+	long along;
+	unsigned long along2;
+	long long along3;
+	unsigned long long along4;
+	octet aoctet;
+	short ashort;
+	unsigned short ashort2;
+    string astring;
+    Custom acustom;
+    sequence<long> aseqbasic;
+    sequence<Custom> aseqcustom;
+    sequence<string> aseqstring;
+    long aarraybasic[64];
+    //Custom aarraycustom[64];
+    //string aarraystring[64];
+    //long aarraybasic2[64][128];
+    //Custom aarraycustom2[64][128];
+    //string aarraystring2[64][128];
+};

@@ -11,6 +11,4 @@ struct S1
 	octet aoctet;
 	short ashort;
 	unsigned short ashort2;
-	string astring;
-	string<1024> astring2;
-};	
+};

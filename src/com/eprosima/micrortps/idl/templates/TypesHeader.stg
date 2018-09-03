@@ -34,6 +34,7 @@ $endif$
 $ctx.directIncludeDependencies : {include | #include "$include$.h"}; separator="\n"$
 
 $definitions; separator="\n"$
+
 #ifdef __cplusplus
 }
 #endif
@@ -63,14 +64,17 @@ $typedefs : { typedef |typedef $typedef.typedefContentTypeCode.cTypename$ $typed
 >>
 
 struct_type(ctx, parent, struct, extensions) ::= <<
+$if(parent)$
+$else$
 /*!
  * @brief This struct represents the structure $struct.cScopedname$ defined by the user in the IDL file.
  * @ingroup $ctx.trimfilename$
  */
+$endif$
+
 typedef struct $struct.cScopedname$
 {
-    $struct.members:{$private_member_declaration(it)$}; separator="\n"$
-
+    $struct.members:{$member_declaration(it)$}; separator="\n"$
 } $struct.cScopedname$;
 
 struct MicroBuffer;
@@ -78,6 +82,7 @@ struct MicroBuffer;
 bool $struct.cScopedname$_serialize_topic(struct MicroBuffer* writer, const $struct.cScopedname$* topic);
 bool $struct.cScopedname$_deserialize_topic(struct MicroBuffer* reader, $struct.cScopedname$* topic);
 uint32_t $struct.cScopedname$_size_of_topic(const $struct.cScopedname$* topic, uint32_t size);
+
 >>
 
 union_type(ctx, parent, union, extensions) ::= <<>>
@@ -85,25 +90,17 @@ enum_type(ctx, parent, enum) ::= <<>>
 
 /***** Utils *****/
 
-public_member_declaration(member) ::= <<>>
-
-private_member_declaration(member) ::= <<
-$private_declaration(typecode=member.typecode, name=member.name)$>>
-
-public_unionmember_declaration(member) ::= <<>>
-
-private_declaration(typecode, name) ::= <<
-$if(typecode.isType_f)$
-$typecode.cTypename$ $name$[$typecode.dimensions$];
-$elseif(typecode.isType_e)$
-uint32_t $name$_size;
-$typecode.cTypename$ $name$_data[$typecode.maxsize$];
-$elseif(typecode.isType_d)$
-$typecode.cTypename$ $name$[$typecode.maxsize$];
+member_declaration(member) ::= <<
+$if(member.typecode.isType_d)$
+$member.typecode.cTypename$ $member.name$[$member.typecode.maxsize$];
+$elseif(member.typecode.isType_e)$
+uint32_t $member.name$_size;
+$member.typecode.contentTypeCode.cTypename$ $member.name$$member.typecode.cTypeDimensions$;
+$elseif(member.typecode.isType_f)$
+$member.typecode.cTypename$ $member.name$$member.typecode.cTypeDimensions$;
 $else$
-$typecode.cTypename$ $name$;
+$member.typecode.cTypename$ $member.name$;
 $endif$
 >>
 
-size_functions(type) ::= <<>>
-serialization_functions(type) ::= <<>>
+unionmember_declaration(member) ::= <<>>

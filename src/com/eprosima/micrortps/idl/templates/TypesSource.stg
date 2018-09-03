@@ -54,19 +54,19 @@ typedef_decl(ctx, parent, typedefs) ::= <<>>
 struct_type(ctx, parent, struct, extensions) ::= <<
 bool $struct.cScopedname$_serialize_topic(MicroBuffer* writer, const $struct.cScopedname$* topic)
 {
-    $struct.members : { member |$object_serialization(ctx=ctx, object=member)$}; separator=""$
+    $struct.members : { member |$member_serialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$}; separator="\n"$
     return writer->error == BUFFER_OK;
 }
 
 bool $struct.cScopedname$_deserialize_topic(MicroBuffer* reader, $struct.cScopedname$* topic)
 {
-    $struct.members : { member |$object_deserialization(ctx=ctx, object=member)$}; separator=""$
+    $struct.members : { member |$member_deserialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$}; separator="\n"$
     return reader->error == BUFFER_OK;
 }
 
 uint32_t $struct.cScopedname$_size_of_topic(const $struct.cScopedname$* topic, uint32_t size)
 {
-    $struct.members : { member|$serialized_size(ctx=ctx, object=member, data="topic", var="size")$};separator=""$
+    $struct.members : { member|$member_serialized_size(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$};separator="\n"$
     return size;
 }
 >>
@@ -75,35 +75,66 @@ union_type(ctx, parent, union) ::= <<>>
 
 enum_type(ctx, parent, enum) ::= <<>>
 
-/***** Utils *****/
+member_serialization(ctx, typecode, name, originName) ::= <<
+$if(typecode.primitive)$(void) serialize_$typecode.cTypename$(writer, topic->$name$);
+$elseif(typecode.isType_d)$
+(void) serialize_sequence_char(writer, topic->$name$, (uint32_t)strlen(topic->$name$) + 1);
+$elseif(typecode.isType_e)$
+$sequence_serialization(ctx=ctx, typecode=typecode, name=name)$
+$elseif(typecode.isType_f)$
+(void) serialize_array_$typecode.cTypename$(writer, topic->$name$, sizeof(topic->$name$));
+$else$(void) $typecode.scopedname$_serialize_topic(writer, &topic->$name$);
+$endif$
+>>
 
-public_unionmember_declaration(class, member, totallabels, defaultvalue) ::= <<>>
+member_deserialization(ctx, typecode, name, originName) ::= <<
+$if(typecode.primitive)$(void) deserialize_$typecode.cTypename$(reader, &topic->$name$);
+$elseif(typecode.isType_d)$
+uint32_t $originName$_length; //not used
+(void) deserialize_sequence_char(reader, topic->$name$, &$originName$_length);
+$elseif(typecode.isType_e)$
+$sequence_deserialization(ctx=ctx, typecode=typecode, name=name)$
+$elseif(typecode.isType_f)$
+(void) deserialize_array_$typecode.cTypename$(reader, topic->$name$, sizeof(topic->$name$));
+$else$(void) $typecode.scopedname$_deserialize_topic(reader, &topic->$name$);
+$endif$
+>>
 
-member_move(member) ::= <<>>
+member_serialized_size(ctx, typecode, name, originName) ::= <<
+>>
 
-// TODO Mirar si el default: esta delante de otros casos, el resto no se ejecuta.
-unionmember_discriminator_case(member, totallabels) ::= <<>>
+sequence_serialization(ctx, typecode, name) ::= <<
+$if(typecode.contentTypeCode.primitive)$
+(void) serialize_sequence_$typecode.cTypename$(writer, topic->$name$, topic->$name$_size);
+$elseif(typecode.contentTypeCode.isType_d)$
+for(int i = 0; i < topic->$name$_size; ++i)
+{    
+    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name), originName=name)$
+}
+$else$
+(void) serialize_uint32_t(writer, topic->$name$_size);
+for(int i = 0; i < topic->$name$_size; ++i)
+{    
+    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name), originName=name)$
+}
+$endif$
+>>
 
-unionmember_copy(member) ::= <<>>
+sequence_deserialization(ctx, typecode, name) ::= <<
+$if(typecode.contentTypeCode.primitive)$
+(void) deserialize_sequence_$typecode.cTypename$(reader, topic->$name$, &topic->$name$_size);
+$elseif(typecode.contentTypeCode.isType_d)$
+for(int i = 0; i < topic->$name$_size; ++i)
+{    
+    $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name), originName=name)$
+}
+$else$
+(void) deserialize_uint32_t(reader, &topic->$name$_size);
+for(int i = 0; i < topic->$name$_size; ++i)
+{    
+    $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name), originName=name)$
+}
+$endif$
+>>
 
-unionmemberdefault_copy(member) ::= <<>>
-
-unionmember_move(member) ::= <<>>
-
-unionmemberdefault_move(member) ::= <<>>
-
-unionmember_set_discriminator(member, defaultvalue) ::= <<>>
-
-unionmember_check_case_list(member, totallabels) ::= <<>>
-
-unionmember_case_selection_se(ctx, member) ::= <<>>
-
-unionmemberdefault_case_selection_se(ctx, member) ::= <<>>
-
-unionmember_case_selection_de(ctx, member) ::= <<>>
-
-unionmemberdefault_case_selection_de(ctx, member) ::= <<>>
-
-unionmember_case_selection_sesize(ctx, member, data, var) ::= <<>>
-
-unionmemberdefault_case_selection_sesize(ctx, member, data, var) ::= <<>>
+indexName(name) ::= <<$name$[i]>>
