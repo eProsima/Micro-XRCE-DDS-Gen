@@ -23,9 +23,10 @@ struct S1
     sequence<Custom> aseqcustom;
     sequence<string> aseqstring;
     long aarraybasic[64];
-    //Custom aarraycustom[64];
-    //string aarraystring[64];
-    //long aarraybasic2[64][128];
-    //Custom aarraycustom2[64][128];
-    //string aarraystring2[64][128];
+    Custom aarraycustom[64];
+    string aarraystring[64];
+    long aarraybasic2[64][128];
+    Custom aarraycustom2[64][128];
+    string aarraystring2[64][128];
+    long aarraybasic3[64][128][256];
 };
