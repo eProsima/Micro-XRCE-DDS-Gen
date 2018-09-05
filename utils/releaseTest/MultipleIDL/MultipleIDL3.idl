@@ -1,12 +1,4 @@
-enum MYENUM4
-{
-	LILA,
-	LILE,
-	LILO
-
-};
-
-struct MYSTRUCT2
+struct MYSTRUCT3
 {
 	long value;
 	string message;

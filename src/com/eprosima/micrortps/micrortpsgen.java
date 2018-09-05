@@ -15,45 +15,35 @@
 package com.eprosima.micrortps;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.text.ParseException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Vector;
-import java.util.HashMap;
 
-import javax.swing.plaf.basic.BasicFormattedTextFieldUI;
 
-import org.antlr.stringtemplate.CommonGroupLoader;
 import org.antlr.stringtemplate.StringTemplate;
 import org.antlr.stringtemplate.StringTemplateErrorListener;
 import org.antlr.stringtemplate.StringTemplateGroup;
-import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.antlr.stringtemplate.language.DefaultTemplateLexer;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 import com.eprosima.micrortps.exceptions.BadArgumentException;
 import com.eprosima.micrortps.idl.grammar.Context;
-import com.eprosima.micrortps.solution.Project;
-import com.eprosima.micrortps.solution.Solution;
+import com.eprosima.solution.Project;
+import com.eprosima.solution.Solution;
 import com.eprosima.micrortps.util.Utils;
-import com.eprosima.micrortps.util.VSConfiguration;
 import com.eprosima.idl.generator.manager.TemplateGroup;
 import com.eprosima.idl.generator.manager.TemplateManager;
 import com.eprosima.idl.generator.manager.TemplateExtension;
 import com.eprosima.idl.parser.grammar.IDLLexer;
 import com.eprosima.idl.parser.grammar.IDLParser;
-import com.eprosima.idl.parser.tree.Interface;
 import com.eprosima.idl.parser.tree.Specification;
 import com.eprosima.idl.parser.tree.AnnotationDeclaration;
 import com.eprosima.idl.parser.tree.AnnotationMember;
@@ -61,17 +51,8 @@ import com.eprosima.idl.parser.typecode.PrimitiveTypeCode;
 import com.eprosima.idl.parser.typecode.TypeCode;
 import com.eprosima.idl.util.Util;
 import com.eprosima.log.ColorMessage;
-import com.eprosima.micrortps.idl.generator.TypesGenerator;
-
-// TODO: Implement Solution & Project in com.eprosima.micrortps.solution
 
 public class micrortpsgen {
-
-    /*
-     * ----------------------------------------------------------------------------------------
-     *
-     * Attributes
-     */
 
     private Vector<String> m_idlFiles;
     protected static String m_appEnv = "MICRORTPSHOME";
@@ -84,46 +65,12 @@ public class micrortpsgen {
     private String m_outputDir = m_defaultOutputDir;
     private String m_tempDir = null;
     protected static String m_appName = "micrortpsgen";
+    protected boolean m_test = false; 
 
-    private boolean m_publishercode = true;
-    private boolean m_subscribercode = true;
-    private boolean m_atLeastOneStructure = false;
     protected static String m_localAppProduct = "micrortps";
-    private ArrayList m_includePaths = new ArrayList();
-
-    private String m_command = null;
-    private String m_extra_command = null;
-    private ArrayList m_lineCommand = null;
-    private ArrayList m_lineCommandForWorkDirSet = null;
-    private String m_spTemplate = "main";
-
-    private static VSConfiguration m_vsconfigurations[]={new VSConfiguration("Debug DLL", "Win32", true, true),
-        new VSConfiguration("Release DLL", "Win32", false, true),
-        new VSConfiguration("Debug", "Win32", true, false),
-        new VSConfiguration("Release", "Win32", false, false)};
+    private ArrayList<String> m_includePaths = new ArrayList<String>();
 
     private String m_os = null;
-    private boolean m_local = false;
-    private boolean fusion_ = false;
-
-    //! Default package used in Java files.
-    private String m_package = "";
-
-    // Use to know the programming language
-    public enum LANGUAGE
-    {
-        CPP,
-        JAVA,
-        C
-    };
-
-    private LANGUAGE m_languageOption = LANGUAGE.C; // Default language -> C
-
-    /*
-     * ----------------------------------------------------------------------------------------
-     *
-     * Constructor
-     */
 
     public micrortpsgen(String [] args) throws BadArgumentException {
 
@@ -149,35 +96,6 @@ public class micrortpsgen {
             else if (arg.equals("-write-access-profile")) {
                 write_access_profile_enabled = true;
             }
-            else if (arg.equals("-language"))
-            {
-                if (count < args.length)
-                {
-                    String languageOption = args[count++];
-
-                    if(languageOption.equalsIgnoreCase("c"))
-                        m_languageOption = LANGUAGE.C;
-                    else if(languageOption.equalsIgnoreCase("c++"))
-                        m_languageOption = LANGUAGE.CPP;
-                    else if(languageOption.equalsIgnoreCase("java"))
-                        m_languageOption = LANGUAGE.JAVA;
-                    else
-                        throw new BadArgumentException("Unknown language " +  languageOption);
-                }
-                else
-                {
-                    throw new BadArgumentException("No language specified after -language argument");
-                }
-            }
-            else if(arg.equals("-package"))
-            {
-                if(count < args.length)
-                {
-                    m_package = args[count++];
-                }
-                else
-                    throw new BadArgumentException("No package after -package argument");
-            }
             else if(arg.equals("-ppPath"))
             {
                 if (count < args.length) {
@@ -195,20 +113,14 @@ public class micrortpsgen {
                 } else {
                     throw new BadArgumentException("No URL specified after -d argument");
                 }
+            } else if (arg.equals("-test")) {
+                m_test = true;
             } else if (arg.equals("-version")) {
                 showVersion();
                 System.exit(0);
             } else if (arg.equals("-help")) {
                 printHelp();
                 System.exit(0);
-            }
-            else if(arg.equals("-local"))
-            {
-                m_local = true;
-            }
-            else if(arg.equals("-fusion"))
-            {
-                fusion_ = true;
             }
             else { // TODO: More options: -local, -rpm, -debug -I
                 throw new BadArgumentException("Unknown argument " + arg);
@@ -249,8 +161,6 @@ public class micrortpsgen {
      */
 
     public boolean execute() {
-
-
         if (!m_outputDir.equals(m_defaultOutputDir)) {
             File dir = new File(m_outputDir);
 
@@ -264,21 +174,11 @@ public class micrortpsgen {
 
         if (returnedValue)
         {
-            Solution solution = new Solution(m_languageOption, getVersion(), m_publishercode, m_subscribercode);
+            Solution solution = new Solution();
 
             // Load string templates
             System.out.println("Loading templates...");
             TemplateManager.setGroupLoaderDirectories("com/eprosima/micrortps/idl/templates");
-
-            // In local for all products
-            if(m_os.contains("Windows"))
-            {
-                solution.addInclude("$(" + m_appEnv + ")/include");
-                solution.addLibraryPath("$(" + m_appEnv + ")/lib");
-            }
-
-            // Add product library
-            solution.addLibrary("micrortps_client");
 
             for (int count = 0; returnedValue && (count < m_idlFiles.size()); ++count) {
                 Project project = process(m_idlFiles.get(count));
@@ -291,42 +191,20 @@ public class micrortpsgen {
             }
 
             // Generate solution
-            if (returnedValue && m_exampleOption) {
+            if (returnedValue && (m_exampleOption || m_test)) {
                 if ((returnedValue = genSolution(solution)) == false) {
                     System.out.println(ColorMessage.error() + "While the solution was being generated");
                 }
             }
-
         }
 
         return returnedValue;
 
     }
 
-    private String getVersion()
-    {
-        try
-        {
-            //InputStream input = this.getClass().getResourceAsStream("/micrortps_version.h");
-
-            InputStream input = this.getClass().getClassLoader().getResourceAsStream("version");
-            byte[] b = new byte[input.available()];
-            input.read(b);
-            String text = new String(b);
-            int beginindex = text.indexOf("=");
-            return text.substring(beginindex + 1);
-        }
-        catch(Exception ex)
-        {
-            System.out.println(ColorMessage.error() + "Getting version. " + ex.getMessage());
-        }
-
-        return "";
-    }
-
     private void showVersion()
     {
-        String version = getVersion();
+        String version = "1.0.0.beta2";
         System.out.println(m_appName + " version " + version);
     }
 
@@ -346,12 +224,9 @@ public class micrortpsgen {
         System.out.println("\t\t-t <temp dir>: sets a specific directory as a temporary directory.");
         System.out.println("\tand the supported input files are:");
         System.out.println("\t* IDL files.");
-
     }
 
     public boolean globalInit() {
-        String dds_root = null, tao_root = null, micrortps_root = null;
-
         // Set the temporary folder
         if (m_tempDir == null) {
             if (m_os.contains("Windows")) {
@@ -370,9 +245,6 @@ public class micrortpsgen {
         if (m_tempDir.charAt(m_tempDir.length() - 1) != File.separatorChar) {
             m_tempDir += File.separator;
         }
-
-        // Set the line command
-        m_lineCommand = new ArrayList();
 
         return true;
     }
@@ -394,21 +266,19 @@ public class micrortpsgen {
         return project;
     }
 
-    private Project parseIDL(String idlFilename) {
+    private Project parseIDL(String idlFileName) {
         boolean returnedValue = false;
-        String idlParseFileName = idlFilename;
+        String idlParseFileName = idlFileName;
         Project project = null;
 
-        String onlyFileName = Util.getIDLFileNameOnly(idlFilename);
+        String idlFileNameOnly = Util.getIDLFileNameOnly(idlFileName);
 
         if (!m_ppDisable) {
-            idlParseFileName = callPreprocessor(idlFilename);
+            idlParseFileName = callPreprocessor(idlFileName);
         }
 
         if (idlParseFileName != null) {
-            Context ctx = new Context(onlyFileName, idlFilename, m_includePaths, m_subscribercode, m_publishercode, m_localAppProduct);
-
-            if(fusion_) ctx.setActivateFusion(true);
+            Context ctx = new Context(idlFileNameOnly, idlFileName, m_includePaths, true, true);
 
             // Create default @Key annotation.
             AnnotationDeclaration keyann = ctx.createAnnotationDeclaration("Key", null);
@@ -419,35 +289,24 @@ public class micrortpsgen {
             topicann.addMember(new AnnotationMember("value", new PrimitiveTypeCode(TypeCode.KIND_BOOLEAN), "true"));
 
             // Create template manager
-            TemplateManager tmanager = new TemplateManager("MicroCdrCommon:eprosima:Common");
-
-            List<TemplateExtension> extensions = new ArrayList<TemplateExtension>();
+            TemplateManager tmanager = new TemplateManager("Common");
 
             // Load common types template
-            extensions.add(new TemplateExtension("struct_type", "keyFunctionHeadersStruct"));
-            tmanager.addGroup("TypesHeader", extensions);
-            tmanager.addGroup("TypesSource", extensions);
+            tmanager.addGroup("TypesHeader");
+            tmanager.addGroup("TypesSource");
 
             // Load write access profile
             tmanager.addGroup("WriteAccessHeader");
             tmanager.addGroup("WriteAccessSource");
 
             // Load Publisher template
-            tmanager.addGroup("RTPSPublisherSource");
+            tmanager.addGroup("PublisherSource");
 
             // Load Subscriber template
-            tmanager.addGroup("RTPSSubscriberSource");
+            tmanager.addGroup("SubscriberSource");
 
-            // Add JNI sources.
-            if(m_languageOption == LANGUAGE.JAVA)
-            {
-                tmanager.addGroup("JNIHeader");
-                tmanager.addGroup("JNISource");
-                tmanager.addGroup("JavaSource");
-
-                // Set package in context.
-                ctx.setPackage(m_package);
-            }
+            // Load test template
+            tmanager.addGroup("SerializationTestSource");
 
             // Create main template
             TemplateGroup maintemplates = tmanager.createTemplateGroup("main");
@@ -473,125 +332,78 @@ public class micrortpsgen {
             if (returnedValue)
             {
                 // Create information of project for solution
-                project = new Project(onlyFileName, idlFilename, ctx.getDependencies());
+                project = new Project(idlFileNameOnly, idlFileName, ctx.getDependencies());
+                String fileName;
 
                 System.out.println("Generating Type definition files...");
-                if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + ".h", maintemplates.getTemplate("TypesHeader"), m_replace)) {
-                    project.addCommonIncludeFile(onlyFileName + ".h");
-                }
 
-                if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + ".c", maintemplates.getTemplate("TypesSource"), m_replace)) {
-                    project.addCommonSrcFile(onlyFileName + ".c");
-                }
+                fileName = m_outputDir + idlFileNameOnly + ".h";
+                returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("TypesHeader"), m_replace);
+                project.addCommonIncludeFile(fileName);
 
-                if (ctx.existsLastStructure())
+                fileName = m_outputDir + idlFileNameOnly + ".c";
+                returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("TypesSource"), m_replace);
+                project.addCommonSrcFile(fileName);
+
+                if (m_test)
                 {
-                    m_atLeastOneStructure = true;
-                    project.setHasStruct(true);
-
-                    if (m_exampleOption || write_access_profile_enabled)
-                    {
-                        System.out.println("Generating Write Access profile files...");
-                        if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + "Writer.h", maintemplates.getTemplate("WriteAccessHeader"), m_replace)) {
-                            project.addCommonIncludeFile(onlyFileName + "Writer.h");
-                        }
-
-                        if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + "Writer.c", maintemplates.getTemplate("WriteAccessSource"), m_replace)) {
-                            project.addCommonSrcFile(onlyFileName + "Writer.c");
-                        }
-                    }
-
-                    if (m_exampleOption)
-                    {
-                        System.out.println("Generating Publisher files...");
-                        if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + "Publisher.c", maintemplates.getTemplate("RTPSPublisherSource"), m_replace))
-                        {
-                            project.addProjectSrcFile(onlyFileName + "Publisher.c");
-                        }
-                        if (returnedValue = Utils.writeFile(m_outputDir + onlyFileName + "Subscriber.c", maintemplates.getTemplate("RTPSSubscriberSource"), m_replace))
-                        {
-                            project.addProjectSrcFile(onlyFileName + "Subscriber.c");
-                        }
-                    }
+                    System.out.println("Generating Serialization Test file...");
+                    fileName = m_outputDir + idlFileNameOnly + "SerializationTest.c";
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationTestSource"), m_replace);
+                    project.addCommonSrcFile(fileName);
                 }
 
-            }
-
-            // Java support (Java classes and JNI code)
-            if(returnedValue && m_languageOption == LANGUAGE.JAVA)
-            {
-                String outputDir = m_outputDir;
-
-                // Make directories from package.
-                if(!m_package.isEmpty())
+                if (ctx.existsLastStructure() && m_exampleOption || write_access_profile_enabled)
                 {
-                    outputDir = m_outputDir + File.separator + m_package.replace('.', File.separatorChar);
-                    File dirs = new File(outputDir);
+                    System.out.println("Generating Write Access profile files...");
 
-                    if(!dirs.exists())
-                    {
-                        if(!dirs.mkdirs())
-                        {
-                            System.out.println(ColorMessage.error() + "Cannot create directories for Java packages.");
-                            return null;
-                        }
-                    }
+                    fileName = m_outputDir + idlFileNameOnly + "Writer.h";
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("WriteAccessHeader"), m_replace);
+                    project.addCommonIncludeFile(fileName);
+
+                    fileName = m_outputDir + idlFileNameOnly + "Writer.c";
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("WriteAccessSource"), m_replace);
+                    project.addCommonSrcFile(fileName);
                 }
 
-                // Java classes.
-                TypesGenerator typeGen = new TypesGenerator(tmanager, m_outputDir, m_replace);
-                TypeCode.javapackage = m_package + (m_package.isEmpty() ? "" : ".");
-                if(!typeGen.generate(ctx, outputDir + File.separator, m_package, onlyFileName, null))
+                if (ctx.existsLastStructure() && m_exampleOption)
                 {
-                    System.out.println(ColorMessage.error() + "generating Java types");
-                    return null;
+                    System.out.println("Generating publisher and subcriber example files...");
+
+                    fileName = m_outputDir + idlFileNameOnly + "Publisher.c";
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("PublisherSource"), m_replace);
+                    project.addCommonSrcFile(fileName);
+
+                    fileName = m_outputDir + idlFileNameOnly + "Subscriber.c";
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SubscriberSource"), m_replace);
+                    project.addCommonSrcFile(fileName);
                 }
-
-                if(ctx.existsLastStructure())
-                {
-                    System.out.println("Generando fichero " + m_outputDir + onlyFileName + "PubSub.java");
-                    if(!Utils.writeFile(outputDir + File.separator + onlyFileName + "PubSub.java", maintemplates.getTemplate("JavaSource"), m_replace))
-                        return null;
-
-                    // Call javah application for each structure.
-                    if(!callJavah(idlFilename))
-                        return null;
-                }
-
-                if(Utils.writeFile(m_outputDir + onlyFileName + "PubSubJNII.h", maintemplates.getTemplate("JNIHeader"), m_replace))
-                    project.addJniIncludeFile(onlyFileName + "PubSubJNII.h");
-                else
-                    return null;
-
-                StringTemplate jnisourceTemplate = maintemplates.getTemplate("JNISource");
-                if(Utils.writeFile(m_outputDir + onlyFileName + "PubSubJNI.cxx", jnisourceTemplate, m_replace))
-                    project.addJniSrcFile(onlyFileName + "PubSubJNI.cxx");
-                else
-                    return null;
             }
         }
 
         return returnedValue ? project : null;
     }
 
+
     private boolean genSolution(Solution solution)
     {
-        return genCMakeLists(solution, "");
+        return genCMakeLists(solution);
     }
 
-    private boolean genCMakeLists(Solution solution, String arch)
+    private boolean genCMakeLists(Solution solution)
     {
         boolean returnedValue = false;
         StringTemplate cmakelists = null;
 
-        StringTemplateGroup cmakeTemplates = StringTemplateGroup.loadGroup("cmakelists", DefaultTemplateLexer.class, null);
+        StringTemplateGroup cmakeTemplates = StringTemplateGroup.loadGroup("CMakeLists", DefaultTemplateLexer.class, null);
 
         if (cmakeTemplates != null)
         {
             cmakelists = cmakeTemplates.getInstanceOf("cmakelists");
 
             cmakelists.setAttribute("solution", solution);
-            cmakelists.setAttribute("arch", arch);
+            cmakelists.setAttribute("examples", m_exampleOption);
+            cmakelists.setAttribute("test", m_test);
 
             returnedValue = Utils.writeFile(m_outputDir + "CMakeLists.txt", cmakelists, m_replace);
         }
@@ -604,8 +416,8 @@ public class micrortpsgen {
         final String METHOD_NAME = "callPreprocessor";
 
         // Set line command.
-        ArrayList lineCommand = new ArrayList();
-        String [] lineCommandArray = null;
+        ArrayList<String> lineCommand = new ArrayList<String>();
+        String[] lineCommandArray = null;
         String outputfile = Util.getIDLFileOnly(idlFilename) + ".cc";
         int exitVal = -1;
         OutputStream of = null;
@@ -691,126 +503,6 @@ public class micrortpsgen {
         }
 
         return outputfile;
-    }
-
-    boolean callJavah(String idlFilename)
-    {
-        final String METHOD_NAME = "calljavah";
-        // Set line command.
-        ArrayList<String> lineCommand = new ArrayList<String>();
-        String[] lineCommandArray = null;
-        String fileDir = Util.getIDLFileDirectoryOnly(idlFilename);
-        String javafile = (m_outputDir != null ? m_outputDir : "") +
-            (!m_package.isEmpty() ? m_package.replace('.', File.separatorChar) + File.separator : "") +
-            Util.getIDLFileNameOnly(idlFilename) + "PubSub.java";
-        String headerfile = m_outputDir + Util.getIDLFileNameOnly(idlFilename) + "PubSubJNI.h";
-        int exitVal = -1;
-        String javac = null;
-        String javah = null;
-
-        // First call javac
-        if(m_os.contains("Windows"))
-        {
-            javac = "javac.exe";
-        }
-        else if(m_os.contains("Linux") || m_os.contains("Mac"))
-        {
-            javac = "javac";
-        }
-
-        // Add command
-        lineCommand.add(javac);
-        if(m_tempDir != null)
-        {
-            lineCommand.add("-d");
-            lineCommand.add(m_tempDir);
-        }
-
-        if( fileDir != null && !fileDir.isEmpty())
-        {
-            lineCommand.add("-sourcepath");
-            lineCommand.add(m_outputDir);
-        }
-
-        lineCommand.add(javafile);
-
-        lineCommandArray = new String[lineCommand.size()];
-        lineCommandArray = (String[])lineCommand.toArray(lineCommandArray);
-
-        try
-        {
-            Process preprocessor = Runtime.getRuntime().exec(lineCommandArray);
-            ProcessOutput errorOutput = new ProcessOutput(preprocessor.getErrorStream(), "ERROR", false, null, true);
-            ProcessOutput normalOutput = new ProcessOutput(preprocessor.getInputStream(), "OUTPUT", false, null, true);
-            errorOutput.start();
-            normalOutput.start();
-            exitVal = preprocessor.waitFor();
-            errorOutput.join();
-            normalOutput.join();
-        }
-        catch(Exception ex)
-        {
-            System.out.println(ColorMessage.error(METHOD_NAME) + "Cannot execute the javac application. Reason: " + ex.getMessage());
-            return false;
-        }
-
-        if(exitVal != 0)
-        {
-            System.out.println(ColorMessage.error(METHOD_NAME) + "javac application return an error " + exitVal);
-            return false;
-        }
-
-        lineCommand = new ArrayList<String>();
-
-        if(m_os.contains("Windows"))
-        {
-            javah = "javah.exe";
-        }
-        else if(m_os.contains("Linux") || m_os.contains("Mac"))
-        {
-            javah = "javah";
-        }
-
-        // Add command
-        lineCommand.add(javah);
-        lineCommand.add("-jni");
-        if(m_tempDir != null)
-        {
-            lineCommand.add("-cp");
-            lineCommand.add(m_tempDir);
-        }
-        lineCommand.add("-o");
-        lineCommand.add(headerfile);
-        lineCommand.add((!m_package.isEmpty() ? m_package + "." : "") +
-                Util.getIDLFileNameOnly(idlFilename) + "PubSub");
-
-        lineCommandArray = new String[lineCommand.size()];
-        lineCommandArray = (String[])lineCommand.toArray(lineCommandArray);
-
-        try
-        {
-            Process preprocessor = Runtime.getRuntime().exec(lineCommandArray);
-            ProcessOutput errorOutput = new ProcessOutput(preprocessor.getErrorStream(), "ERROR", false, null, true);
-            ProcessOutput normalOutput = new ProcessOutput(preprocessor.getInputStream(), "OUTPUT", false, null, true);
-            errorOutput.start();
-            normalOutput.start();
-            exitVal = preprocessor.waitFor();
-            errorOutput.join();
-            normalOutput.join();
-        }
-        catch(Exception ex)
-        {
-            System.out.println(ColorMessage.error(METHOD_NAME) + "Cannot execute the javah application. Reason: " + ex.getMessage());
-            return false;
-        }
-
-        if(exitVal != 0)
-        {
-            System.out.println(ColorMessage.error(METHOD_NAME) + "javah application return an error " + exitVal);
-            return false;
-        }
-
-        return true;
     }
 
     /*

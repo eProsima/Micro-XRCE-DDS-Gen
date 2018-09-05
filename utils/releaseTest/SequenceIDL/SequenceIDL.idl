@@ -1,14 +1,21 @@
+struct Custom
+{
+
+};
+
 struct SeqStruct
 {
-	
+	sequence<boolean> aboolean;
 	sequence<char> achar;
-	sequence<double> adouble;
-	sequence<float> afloat;
-	sequence<long> along;
 	sequence<octet> aoctet;
 	sequence<short> ashort;
+	sequence<long> along;
+	sequence<float> afloat;
+	sequence<double> adouble;
 	sequence<string> astring;
 	sequence<string<1024> > astring2;
-	sequence<boolean> aboolean;
-
+    sequence<Custom> acustom;
+    sequence<sequence<long> > aseq;
+    sequence<sequence<Custom> > aseq2;
+    sequence<sequence<Custom, 128>, 64> aseq3;
 };

@@ -1,6 +1,5 @@
 
 struct IncludeType {
-    float               include_float;
-    double              include_double;
-    short               include_short;
+    long               include_long_1;
+    long               include_long_2;
 };

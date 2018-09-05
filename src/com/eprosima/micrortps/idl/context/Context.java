@@ -39,7 +39,5 @@ public interface Context
 
     public boolean isCdr();
 
-    public boolean isFastcdr();
-
     /*** End ***/
 }

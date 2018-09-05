@@ -17,6 +17,7 @@ package com.eprosima.micrortps.util;
 import org.antlr.stringtemplate.StringTemplate;
 
 import java.io.*;
+import java.util.Scanner;
 
 public class Utils
 {
@@ -102,6 +103,32 @@ public class Utils
         }
 
         return returnedValue;
+    }
+
+    public static boolean searchInFile(String fileName, String searchText)
+    {
+        Scanner scan = null;
+        try
+        {
+            scan = new Scanner(new File(fileName));
+            while(scan.hasNext()){
+                String line = scan.nextLine().toLowerCase().toString();
+                if(line.contains(searchText)){
+                    return true;
+                }
+            }
+        } 
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            if(scan != null)
+                scan.close();
+        }
+
+        return false;
     }
 
 	public static String getFileExtension(String fileName)
