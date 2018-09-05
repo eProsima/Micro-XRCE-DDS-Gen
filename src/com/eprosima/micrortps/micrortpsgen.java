@@ -65,9 +65,8 @@ public class micrortpsgen {
     private String m_outputDir = m_defaultOutputDir;
     private String m_tempDir = null;
     protected static String m_appName = "micrortpsgen";
+    protected boolean m_test = false; 
 
-    private boolean m_publishercode = true;
-    private boolean m_subscribercode = true;
     protected static String m_localAppProduct = "micrortps";
     private ArrayList<String> m_includePaths = new ArrayList<String>();
 
@@ -114,6 +113,8 @@ public class micrortpsgen {
                 } else {
                     throw new BadArgumentException("No URL specified after -d argument");
                 }
+            } else if (arg.equals("-test")) {
+                m_test = true;
             } else if (arg.equals("-version")) {
                 showVersion();
                 System.exit(0);
@@ -190,7 +191,7 @@ public class micrortpsgen {
             }
 
             // Generate solution
-            if (returnedValue && m_exampleOption) {
+            if (returnedValue && (m_exampleOption || m_test)) {
                 if ((returnedValue = genSolution(solution)) == false) {
                     System.out.println(ColorMessage.error() + "While the solution was being generated");
                 }
@@ -277,7 +278,7 @@ public class micrortpsgen {
         }
 
         if (idlParseFileName != null) {
-            Context ctx = new Context(idlFileNameOnly, idlFileName, m_includePaths, m_subscribercode, m_publishercode);
+            Context ctx = new Context(idlFileNameOnly, idlFileName, m_includePaths, true, true);
 
             // Create default @Key annotation.
             AnnotationDeclaration keyann = ctx.createAnnotationDeclaration("Key", null);
@@ -303,6 +304,9 @@ public class micrortpsgen {
 
             // Load Subscriber template
             tmanager.addGroup("SubscriberSource");
+
+            // Load test template
+            tmanager.addGroup("SerializationTestSource");
 
             // Create main template
             TemplateGroup maintemplates = tmanager.createTemplateGroup("main");
@@ -341,6 +345,14 @@ public class micrortpsgen {
                 returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("TypesSource"), m_replace);
                 project.addCommonSrcFile(fileName);
 
+                if (m_test)
+                {
+                    System.out.println("Generating Serialization Test file...");
+                    fileName = m_outputDir + idlFileNameOnly + "SerializationTest.c";
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationTestSource"), m_replace);
+                    project.addCommonSrcFile(fileName);
+                }
+
                 if (ctx.existsLastStructure() && m_exampleOption || write_access_profile_enabled)
                 {
                     System.out.println("Generating Write Access profile files...");
@@ -375,22 +387,23 @@ public class micrortpsgen {
 
     private boolean genSolution(Solution solution)
     {
-        return genCMakeLists(solution, "");
+        return genCMakeLists(solution);
     }
 
-    private boolean genCMakeLists(Solution solution, String arch)
+    private boolean genCMakeLists(Solution solution)
     {
         boolean returnedValue = false;
         StringTemplate cmakelists = null;
 
-        StringTemplateGroup cmakeTemplates = StringTemplateGroup.loadGroup("cmakelists", DefaultTemplateLexer.class, null);
+        StringTemplateGroup cmakeTemplates = StringTemplateGroup.loadGroup("CMakeLists", DefaultTemplateLexer.class, null);
 
         if (cmakeTemplates != null)
         {
             cmakelists = cmakeTemplates.getInstanceOf("cmakelists");
 
             cmakelists.setAttribute("solution", solution);
-            cmakelists.setAttribute("arch", arch);
+            cmakelists.setAttribute("examples", m_exampleOption);
+            cmakelists.setAttribute("test", m_test);
 
             returnedValue = Utils.writeFile(m_outputDir + "CMakeLists.txt", cmakelists, m_replace);
         }

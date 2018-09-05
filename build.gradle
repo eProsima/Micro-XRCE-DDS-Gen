@@ -81,6 +81,7 @@ task testCodeGen(type: JavaExec) {
         'share/micrortps/micrortpsgen.jar',
         '-replace',
         '-example',
+        '-test',
         '-write-access-profile',
         'test/IncludeType.idl',
         'test/TestType.idl',

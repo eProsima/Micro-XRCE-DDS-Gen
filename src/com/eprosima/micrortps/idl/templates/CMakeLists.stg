@@ -14,7 +14,7 @@
 
 group CMakeLists;
 
-cmakelists(solution, arch) ::= <<
+cmakelists(solution, examples, test) ::= <<
 
 cmake_minimum_required(VERSION 2.8.12)
 if (\${CMAKE_VERSION} VERSION_GREATER 3.0)
@@ -24,7 +24,9 @@ endif()
 project(client_examples)
 
 find_package(microcdr REQUIRED)
+$if(examples)$
 find_package(micrortps_client REQUIRED)
+$endif$
 
 # Warnings
 if(MSVC OR MSVC_IDE)
@@ -37,10 +39,12 @@ set(SRCS
     $solution.projects : {$it.name$.c}; separator="\n"$
     )
 
-$solution.projects : {$pub_sub_execs(project=it, libraries=solution.libraries)$}; separator="\n"$
+$solution.projects : {$execs(project=it, libraries=solution.libraries, examples=examples, test=test)$}; separator="\n"$
+
 >>
 
-pub_sub_execs(project, libraries) ::= <<
+execs(project, libraries, examples, test) ::= <<
+$if(examples)$
 # $project.name$ Subscriber
 add_executable($project.name$Subscriber $project.name$Subscriber.c \${SRCS})
 target_link_libraries($project.name$Subscriber micrortps_client)
@@ -49,4 +53,12 @@ target_link_libraries($project.name$Subscriber micrortps_client)
 add_executable($project.name$Publisher $project.name$Publisher.c $project.name$Writer.c \${SRCS})
 target_link_libraries($project.name$Publisher micrortps_client)
 
+
+$endif$
+$if(examples)$
+# $project.name$ Serialization Test 
+add_executable($project.name$SerializationTest $project.name$SerializationTest.c \${SRCS})
+target_link_libraries($project.name$SerializationTest micrortps_client)
+
+$endif$
 >>
