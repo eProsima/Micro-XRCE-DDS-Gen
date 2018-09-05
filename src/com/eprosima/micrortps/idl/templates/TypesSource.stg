@@ -109,7 +109,7 @@ $endif$
 
 array_serialization(ctx, typecode, name, originName, dimensions) ::= <<
 $if(rest(dimensions))$
-for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$); ++i$length(dimensions)$)
+for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$) / sizeof(topic->$name$[0]); ++i$length(dimensions)$)
 {
     $array_serialization(ctx=ctx, typecode=typecode, name=indexName(name=name, suffix=length(dimensions)), originName=originName, dimensions=rest(dimensions))$
 }
@@ -160,7 +160,7 @@ $endif$
 
 array_deserialization(ctx, typecode, name, originName, dimensions) ::= <<
 $if(rest(dimensions))$
-for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$); ++i$length(dimensions)$)
+for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$) / sizeof(topic->$name$[0]); ++i$length(dimensions)$)
 {
     $array_deserialization(ctx=ctx, typecode=typecode, name=indexName(name=name, suffix=length(dimensions)), originName=originName, dimensions=rest(dimensions))$
 }
@@ -210,7 +210,7 @@ $endif$
 
 array_size(ctx, typecode, name, originName, dimensions) ::= <<
 $if(rest(dimensions))$
-for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$); ++i$length(dimensions)$)
+for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$) / sizeof(topic->$name$[0]); ++i$length(dimensions)$)
 {
     $array_size(ctx=ctx, typecode=typecode, name=indexName(name=name, suffix=length(dimensions)), originName=originName, dimensions=rest(dimensions))$
 }

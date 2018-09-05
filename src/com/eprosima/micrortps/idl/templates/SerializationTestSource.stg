@@ -35,31 +35,25 @@ int test$ctx.lastStructure.name$()
     $ctx.lastStructure.name$ $ctx.lastStructure.name$_serialization_topic = {0};
     $ctx.lastStructure.name$ $ctx.lastStructure.name$_deserialization_topic = {0};
 
-    printf("1\n");
     initialize$ctx.lastStructure.name$(&$ctx.lastStructure.name$_serialization_topic);
 
     uint8_t buffer[BUFFER_SIZE];
     MicroBuffer mb;
 
-    printf("2\n");
     init_micro_buffer(&mb, buffer, BUFFER_SIZE);
     $ctx.lastStructure.name$_serialize_topic(&mb, &$ctx.lastStructure.name$_serialization_topic);
 
-    printf("3\n");
     reset_micro_buffer(&mb);
     $ctx.lastStructure.name$_deserialize_topic(&mb, &$ctx.lastStructure.name$_deserialization_topic);
 
-    printf("4\n");
     uint32_t $ctx.lastStructure.name$_serialization_topic_size = $ctx.lastStructure.name$_size_of_topic(&$ctx.lastStructure.name$_serialization_topic, 0);
     uint32_t $ctx.lastStructure.name$_deserialization_topic_size = $ctx.lastStructure.name$_size_of_topic(&$ctx.lastStructure.name$_deserialization_topic, 0);
     uint32_t buffer_length = micro_buffer_length(&mb);
 
-    printf("5\n");
     int topic_equal = 0 == memcmp(&$ctx.lastStructure.name$_serialization_topic, &$ctx.lastStructure.name$_deserialization_topic, sizeof($ctx.lastStructure.name$));
     int size_equal = $ctx.lastStructure.name$_serialization_topic_size == $ctx.lastStructure.name$_deserialization_topic_size; 
     size_equal = size_equal && $ctx.lastStructure.name$_serialization_topic_size == buffer_length;
 
-    printf("6\n");
     printf("\n");
     printf("===== Before serialize: =====\n");
     print$ctx.lastStructure.name$(&$ctx.lastStructure.name$_serialization_topic);
@@ -139,7 +133,7 @@ $endif$
 
 array_assigment(typecode, name, originalName, dimensions) ::= <<
 $if(rest(dimensions))$
-for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$); ++i$length(dimensions)$)
+for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$) / sizeof(topic->$name$[0]); ++i$length(dimensions)$)
 {
     $array_assigment(typecode=typecode, name=indexName(name=name, suffix=length(dimensions)), originName=originName, dimensions=rest(dimensions))$
 }
@@ -191,7 +185,8 @@ $endif$
 
 array_print(typecode, name, originalName, dimensions) ::= <<
 $if(rest(dimensions))$
-for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$); ++i$length(dimensions)$)
+printf("$name$: \n");
+for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$) / sizeof(topic->$name$[0]); ++i$length(dimensions)$)
 {
     $array_print(typecode=typecode, name=indexName(name=name, suffix=length(dimensions)), originName=originName, dimensions=rest(dimensions))$
 }

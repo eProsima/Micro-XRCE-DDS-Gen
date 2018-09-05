@@ -27,8 +27,8 @@ struct TestType {
     CustomType                 test_array_custom[2];
     string                     test_array_string[2];
     long                       test_array_2_long[2][4];
-    //CustomType                 test_array_2_custom[2][4];
-    //string                     test_array_2_string[2][4];
-    //long                       test_array_3_long[2][4][8];
+    CustomType                 test_array_2_custom[2][4];
+    string                     test_array_2_string[2][4];
+    long                       test_array_3_long[2][4][8];
 };
 
