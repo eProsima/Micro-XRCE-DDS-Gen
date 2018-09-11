@@ -1,14 +1,18 @@
-struct S1
+struct Basics
 {
-	boolean aboolean;
-	char achar;
-	double adouble;
-	float afloat;
-	long along;
-	unsigned long along2;
-	long long along3;
-	unsigned long long along4;
-	octet aoctet;
+	boolean var_boolean;
+	char var_char;
+    octet var_octet;
+
 	short ashort;
-	unsigned short ashort2;
+    unsigned short var_ushort;
+
+	long var_long;
+	unsigned long var_ulong;
+
+	long long var_longlong;
+	unsigned long long var_ulonglong;
+
+	float var_float;
+	double var_double;
 };

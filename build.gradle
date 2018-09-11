@@ -15,8 +15,6 @@
 apply plugin: 'java'
 apply plugin: 'eclipse' // Eclipse integration
 
-description = """"""
-
 repositories {
     mavenCentral()
 }
@@ -71,21 +69,18 @@ compileJava {
     targetCompatibility = 1.6
 }
 
+//Test API
+/*import com.eprosima.TestManager
+import com.eprosima.TestManager.TestLevel
+import com.eprosima.IDL*/
 
-task testCodeGen(type: JavaExec) {
-    File outputDir = file("${project.buildDir}/test")
-    outputDir.exists() || outputDir.mkdirs()
-
-    main = '-jar';
-    args = [
-        'share/micrortps/micrortpsgen.jar',
-        '-replace',
-        '-example',
-        '-test',
-        '-write-access-profile',
-        'test/IncludeType.idl',
-        'test/TestType.idl',
-        '-d',
-        outputDir,
-    ]
-}
+/*task idlTests(dependsOn: build) {
+    doLast {
+        def testManager = new TestManager(TestLevel.RUN, "share/micrortps/micrortpsgen", projectDir.toString() + "/test/idls")
+        //test.addCMakeArguments("-DEPROSIMA_BUILD=ON")
+        //test.addCMakeArguments("-DCMAKE_PREFIX_PATH=/home/luis/Repositories/eprosima/micrortps/client/build/install")
+        //test.removeTests(IDL.ARRAY_NESTED, IDL.SEQUENCE_NESTED);
+        //test.addTests(IDL.BASIC, IDL.CUSTOM, IDL.STRING, IDL.ARRAY_BASIC, IDL.ARRAY_STRING, IDL.ARRAY_CUSTOM, IDL.SEQUENCE_BASIC, IDL.SEQUENCE_STRING, IDL.SEQUENCE_CUSTOM);
+        test.runTests()
+    }
+}*/

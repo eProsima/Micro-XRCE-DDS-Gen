@@ -157,7 +157,7 @@ $endif$
 // ========================================================================================
 member_print(typecode, name, originName) ::= <<
 $if(typecode.primitive)$
-printf("$name$: 0X%" PRIx64 "\n", (uint64_t)topic->$name$);
+printf("$name$: 0x%" PRIx64 "\n", (uint64_t)topic->$name$);
 $elseif(typecode.isType_d)$
 printf("$name$: %s\n", topic->$name$);
 $elseif(typecode.isType_e)$
@@ -170,7 +170,7 @@ $endif$
 >>
 
 sequence_print(typecode, name) ::= <<
-printf("$name$_size: 0X%" PRIx64 "\n", (uint64_t)topic->$name$_size);
+printf("$name$_size: 0x%" PRIx64 "\n", (uint64_t)topic->$name$_size);
 $if(typecode.contentTypeCode.primitive)$
 printf("$name$: ");
 $print_sequence(name)$
@@ -211,7 +211,7 @@ $endif$
 print_sequence(name) ::= <<
 for(int i = 0; i < topic->$name$_size; ++i)
 {
-    printf("%02X ", topic->$name$[i]);
+    printf("%" PRIx64 " ", (uint64_t)topic->$name$[i]);
 }
 printf("\n");
 >>
@@ -219,7 +219,7 @@ printf("\n");
 print_array(typecode, name) ::= <<
 for(int i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 {
-    printf("%02X ", topic->$name$[i]);
+    printf("%" PRIx64 " ", (uint64_t)topic->$name$[i]);
 }
 printf("\n");
 >>
