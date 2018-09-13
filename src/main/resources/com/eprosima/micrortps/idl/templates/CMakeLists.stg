@@ -24,9 +24,7 @@ endif()
 project(client_examples)
 
 find_package(microcdr REQUIRED)
-$if(examples)$
 find_package(micrortps_client REQUIRED)
-$endif$
 
 # Warnings
 if(MSVC OR MSVC_IDE)
@@ -40,11 +38,9 @@ set(SRCS
     )
 
 $solution.projects : {$execs(project=it, libraries=solution.libraries, examples=examples, test=test)$}; separator="\n"$
-
 >>
 
 execs(project, libraries, examples, test) ::= <<
-$if(examples)$
 # $project.name$ Subscriber
 add_executable($project.name$Subscriber $project.name$Subscriber.c \${SRCS})
 target_link_libraries($project.name$Subscriber micrortps_client)
@@ -54,7 +50,6 @@ add_executable($project.name$Publisher $project.name$Publisher.c $project.name$W
 target_link_libraries($project.name$Publisher micrortps_client)
 
 
-$endif$
 $if(test)$
 # $project.name$ Serialization Test 
 add_executable($project.name$SerializationTest $project.name$SerializationTest.c \${SRCS})

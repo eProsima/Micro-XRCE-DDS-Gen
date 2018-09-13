@@ -15,6 +15,9 @@
 apply plugin: 'java'
 apply plugin: 'eclipse' // Eclipse integration
 
+version = '1.0.0beta2'
+description = 'Build script with all necessary tasks to compile and test MicroRTPSGen'
+
 repositories {
     mavenCentral()
 }
@@ -48,9 +51,10 @@ sourceSets {
 jar {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     baseName = 'micrortpsgen'
+    archiveName = "${jar.baseName}.${jar.extension}"
     destinationDir = file(new File(projectDir, 'share/micrortps'))
     manifest {
-        attributes("Created-By": "eProsima", "Main-Class": "com.eprosima.micrortps.micrortpsgen")
+        attributes("Created-By": "eProsima", "Main-Class": "com.eprosima.micrortps.micrortpsgen", "Specification-Version": version)
     }
 }
 

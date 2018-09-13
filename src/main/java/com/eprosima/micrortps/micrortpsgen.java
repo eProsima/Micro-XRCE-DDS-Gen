@@ -14,6 +14,7 @@
 
 package com.eprosima.micrortps;
 
+import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,9 +23,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Vector;
-
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 import org.antlr.stringtemplate.StringTemplate;
 import org.antlr.stringtemplate.StringTemplateErrorListener;
@@ -202,8 +206,20 @@ public class micrortpsgen {
 
     private void showVersion()
     {
-        String version = "1.0.0.beta2";
-        System.out.println(m_appName + " version " + version);
+        try
+        {
+            String classPath = getClass().getResource(getClass().getSimpleName() + ".class").toString(); 
+            String libPath = classPath.substring(0, classPath.lastIndexOf("!")); 
+            String filePath = libPath + "!/META-INF/MANIFEST.MF"; 
+            Manifest manifest = new Manifest(new URL(filePath).openStream()); 
+            String version = manifest.getMainAttributes().getValue("Specification-Version");
+
+            System.out.println(m_appName + " version: " + version);
+        } 
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     public static void printHelp()
