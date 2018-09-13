@@ -55,7 +55,7 @@ target_link_libraries($project.name$Publisher micrortps_client)
 
 
 $endif$
-$if(examples)$
+$if(test)$
 # $project.name$ Serialization Test 
 add_executable($project.name$SerializationTest $project.name$SerializationTest.c \${SRCS})
 target_link_libraries($project.name$SerializationTest micrortps_client)

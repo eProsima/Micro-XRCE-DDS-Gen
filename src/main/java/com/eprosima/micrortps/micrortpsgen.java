@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -41,7 +40,6 @@ import com.eprosima.solution.Solution;
 import com.eprosima.micrortps.util.Utils;
 import com.eprosima.idl.generator.manager.TemplateGroup;
 import com.eprosima.idl.generator.manager.TemplateManager;
-import com.eprosima.idl.generator.manager.TemplateExtension;
 import com.eprosima.idl.parser.grammar.IDLLexer;
 import com.eprosima.idl.parser.grammar.IDLParser;
 import com.eprosima.idl.parser.tree.Specification;
@@ -393,13 +391,12 @@ public class micrortpsgen {
     private boolean genCMakeLists(Solution solution)
     {
         boolean returnedValue = false;
-        StringTemplate cmakelists = null;
 
         StringTemplateGroup cmakeTemplates = StringTemplateGroup.loadGroup("CMakeLists", DefaultTemplateLexer.class, null);
 
         if (cmakeTemplates != null)
         {
-            cmakelists = cmakeTemplates.getInstanceOf("cmakelists");
+            StringTemplate cmakelists = cmakeTemplates.getInstanceOf("cmakelists");
 
             cmakelists.setAttribute("solution", solution);
             cmakelists.setAttribute("examples", m_exampleOption);
