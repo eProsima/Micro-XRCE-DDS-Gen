@@ -17,7 +17,6 @@
 
 errorstatus=0
 globalerrorstatus=0
-configuration=x64Linux2.6gcc
 failedtests=""
 correcttests=""
 
@@ -35,32 +34,27 @@ function execTest
     	fi
 	done
 	echo "FOUND IDL FILES: $IDLFILES"
+
 	#Generate Info
-	cp ../../../share/micrortps/micrortpsgen.jar .
-	java -jar micrortpsgen.jar -local -example $configuration -replace $IDLFILES
+	../../../scripts/micrortpsgen -example -replace -write-access-profile $IDLFILES
 	errorstatus=$?
 
     if [ $errorstatus != 0 ]; then return; fi
-    #If the makefile is not present than can be OK.
-    if [ ! -f "makefile_$configuration" ]; then
-        rm *.jar
-        rm *.h
-        rm *.cxx
-        return;
-    fi
+
     #Compile
-    make -f makefile_$configuration all
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_PREFIX_PATH=/home/luis/Repositories/eprosima/micrortps/client/build/install
+    make
     errorstatus=$?
-    if [ $errorstatus != 0 ]; then return; fi
-    #Remove all files:
+    cd ..
+
+    #clean:
     if [ $2 == "nodelete" ]; then return; fi
-    rm -R bin/
-    rm -R output/
-    rm -R lib/
-    rm *.cxx
+    rm -R build
+    rm *.c
     rm *.h
-    rm makefile*
-    rm *.jar
+    rm CMakeLists.txt
 }
 
 if [ $# -ge 1 ]; then

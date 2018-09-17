@@ -1,22 +1,6 @@
-enum MYENUM1
+struct MYSTRUCT1
 {
-	HOLA,
-	ADIOS
+	long value;
+	string message;
 };
 
-enum MYENUM2
-{
-	RICARDO,
-	RUBEN,
-	RAFA
-};
-
-union MYUNION switch(long)
-{
-	case 1:
-		long value;
-	case 2:
-		long value2;
-	default:
-		boolean ar;
-};

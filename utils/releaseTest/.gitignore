@@ -1,7 +1,4 @@
-*.cxx
 *.h
-*.jar
-makefile_*
-bin/
-lib/
-output/
+*.c
+CMakeLists.txt
+build
