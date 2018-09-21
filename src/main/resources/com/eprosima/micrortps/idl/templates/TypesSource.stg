@@ -56,13 +56,13 @@ struct_type(ctx, parent, struct, extensions) ::= <<
 bool $struct.cScopedname$_serialize_topic(MicroBuffer* writer, const $struct.cScopedname$* topic)
 {
     $struct.members : { member |$member_serialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$}; separator="\n"$
-    return writer->error == BUFFER_OK;
+    return writer->error;
 }
 
 bool $struct.cScopedname$_deserialize_topic(MicroBuffer* reader, $struct.cScopedname$* topic)
 {
     $struct.members : { member |$member_deserialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$}; separator="\n"$
-    return reader->error == BUFFER_OK;
+    return reader->error;
 }
 
 uint32_t $struct.cScopedname$_size_of_topic(const $struct.cScopedname$* topic, uint32_t size)
