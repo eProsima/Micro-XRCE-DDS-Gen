@@ -35,7 +35,7 @@ public class MicroRTPSGenIntegrationTest
                 System.exit(-1);
             }
         }
-          
+
 
         //Configure idl tests
         TestManager tests = new TestManager(TestLevel.RUN, "share/micrortps/micrortpsgen", INPUT_PATH, OUTPUT_PATH + "/idls");
