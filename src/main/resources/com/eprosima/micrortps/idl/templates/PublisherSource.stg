@@ -17,9 +17,11 @@ group ProtocolHeader;
 main(ctx, definitions) ::= <<
 $fileHeader(ctx=ctx,  file=[ctx.filename, "Publisher.c"], description=["This file contains the implementation of the publisher functions."])$
 
-#include "$ctx.filename$Writer.h"
+#include "$ctx.filename$.h"
 
 #include <micrortps/client/client.h>
+#include <microcdr/microcdr.h>
+
 #include <stdio.h>
 
 #define STREAM_HISTORY  8
@@ -84,7 +86,11 @@ int main(void)
     while(true)
     {
         $ctx.lastStructure.cScopedname$ topic = {0};
-        (void) mr_write_$ctx.lastStructure.cScopedname$_topic(&session, reliable_out, datawriter_id, &topic);
+
+        MicroBuffer mb;
+        uint32_t topic_size = $ctx.lastStructure.cScopedname$_size_of_topic(&topic, 0);
+        mr_prepare_output_stream(&session, reliable_out, datawriter_id, &mb, topic_size);
+        $ctx.lastStructure.cScopedname$_serialize_topic(&mb, &topic);
 
         mr_run_session_until_timeout(&session, 1000);
     }

@@ -364,7 +364,7 @@ public class micrortpsgen {
                     project.addCommonSrcFile(fileName);
                 }
 
-                if (ctx.existsLastStructure() && m_exampleOption || write_access_profile_enabled)
+                if (write_access_profile_enabled)
                 {
                     System.out.println("Generating Write Access profile files...");
 
