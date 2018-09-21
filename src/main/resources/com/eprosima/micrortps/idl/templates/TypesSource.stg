@@ -85,7 +85,7 @@ member_serialization(ctx, typecode, name, originName) ::= <<
 $if(typecode.primitive)$
 (void) serialize_$typecode.cTypename$(writer, topic->$name$);
 $elseif(typecode.isType_d)$
-(void) serialize_sequence_char(writer, topic->$name$, (uint32_t)strlen(topic->$name$) + 1);
+(void) serialize_string(writer, topic->$name$);
 $elseif(typecode.isType_e)$
 $sequence_serialization(ctx=ctx, typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$
@@ -136,7 +136,7 @@ $if(typecode.primitive)$
 (void) deserialize_$typecode.cTypename$(reader, &topic->$name$);
 $elseif(typecode.isType_d)$
 uint32_t $originName$_length; //not used
-(void) deserialize_sequence_char(reader, topic->$name$, &$originName$_length);
+(void) deserialize_string(reader, topic->$name$, $typecode.maxsize$);
 $elseif(typecode.isType_e)$
 $sequence_deserialization(ctx=ctx, typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$

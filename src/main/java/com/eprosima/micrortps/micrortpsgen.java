@@ -14,7 +14,6 @@
 
 package com.eprosima.micrortps;
 
-import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,9 +24,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Vector;
-import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import org.antlr.stringtemplate.StringTemplate;
