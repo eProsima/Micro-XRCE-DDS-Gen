@@ -148,7 +148,7 @@ $endif$
 
 sequence_deserialization(ctx, typecode, name) ::= <<
 $if(typecode.contentTypeCode.primitive)$
-(void) deserialize_sequence_$typecode.cTypename$(reader, topic->$name$, &topic->$name$_size);
+(void) deserialize_sequence_$typecode.cTypename$(reader, topic->$name$, $typecode.maxsize$, &topic->$name$_size);
 $else$
 (void) deserialize_uint32_t(reader, &topic->$name$_size);
 for(int i = 0; i < topic->$name$_size; ++i)
