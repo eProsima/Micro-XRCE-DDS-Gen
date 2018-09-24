@@ -36,10 +36,8 @@ public class MicroRTPSGenIntegrationTest
             }
         }
 
-
         //Configure idl tests
         TestManager tests = new TestManager(TestLevel.RUN, "share/micrortps/micrortpsgen", INPUT_PATH, OUTPUT_PATH + "/idls");
-        tests.addCMakeArguments("-DEPROSIMA_BUILD=ON");
         tests.addCMakeArguments("-DCMAKE_PREFIX_PATH=" + System.getProperty("user.dir") + "/" + OUTPUT_PATH + "/micro-RTPS-client/build/install");
         tests.removeTests(IDL.ARRAY_NESTED, IDL.SEQUENCE_NESTED);
         boolean testResult = tests.runTests();

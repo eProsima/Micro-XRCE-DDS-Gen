@@ -135,7 +135,6 @@ member_deserialization(ctx, typecode, name, originName) ::= <<
 $if(typecode.primitive)$
 (void) deserialize_$typecode.cTypename$(reader, &topic->$name$);
 $elseif(typecode.isType_d)$
-uint32_t $originName$_length; //not used
 (void) deserialize_string(reader, topic->$name$, $typecode.maxsize$);
 $elseif(typecode.isType_e)$
 $sequence_deserialization(ctx=ctx, typecode=typecode, name=name)$
