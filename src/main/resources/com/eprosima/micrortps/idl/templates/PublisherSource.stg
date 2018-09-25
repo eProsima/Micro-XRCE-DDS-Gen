@@ -17,9 +17,11 @@ group ProtocolHeader;
 main(ctx, definitions) ::= <<
 $fileHeader(ctx=ctx,  file=[ctx.filename, "Publisher.c"], description=["This file contains the implementation of the publisher functions."])$
 
-#include "$ctx.filename$Writer.h"
+#include "$ctx.filename$.h"
 
 #include <micrortps/client/client.h>
+#include <microcdr/microcdr.h>
+
 #include <stdio.h>
 
 #define STREAM_HISTORY  8
@@ -27,8 +29,7 @@ $fileHeader(ctx=ctx,  file=[ctx.filename, "Publisher.c"], description=["This fil
 
 $definitions; separator="\n"$
 
-static const char* topic_xml =
-"<dds><topic>$if(ctx.lastStructure.typeCode.hasKey)$<kind>WITH_KEY</kind>$endif$<name>$ctx.filename$PubSubTopic</name><dataType>$ctx.lastStructure.scopedname$</dataType></topic></dds>";
+static const char* topic_xml = "<dds><topic>$if(ctx.lastStructure.typeCode.hasKey)$<kind>WITH_KEY</kind>$endif$<name>$ctx.filename$PubSubTopic</name><dataType>$ctx.lastStructure.scopedname$</dataType></topic></dds>";
 static const char* publisher_xml = "<publisher name=\"MyPublisher\"";
 static const char* datawriter_xml = "<profiles><publisher profile_name=\"default_xrce_publisher_profile\"><topic><kind>$if(ctx.lastStructure.typeCode.hasKey)$WITH_KEY$else$NO_KEY$endif$</kind><name>$ctx.filename$PubSubTopic</name><dataType>$ctx.lastStructure.scopedname$</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></publisher></profiles>";
 
@@ -84,7 +85,11 @@ int main(void)
     while(true)
     {
         $ctx.lastStructure.cScopedname$ topic = {0};
-        (void) mr_write_$ctx.lastStructure.cScopedname$_topic(&session, reliable_out, datawriter_id, &topic);
+
+        MicroBuffer mb;
+        uint32_t topic_size = $ctx.lastStructure.cScopedname$_size_of_topic(&topic, 0);
+        mr_prepare_output_stream(&session, reliable_out, datawriter_id, &mb, topic_size);
+        $ctx.lastStructure.cScopedname$_serialize_topic(&mb, &topic);
 
         mr_run_session_until_timeout(&session, 1000);
     }

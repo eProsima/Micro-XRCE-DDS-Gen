@@ -56,13 +56,13 @@ struct_type(ctx, parent, struct, extensions) ::= <<
 bool $struct.cScopedname$_serialize_topic(MicroBuffer* writer, const $struct.cScopedname$* topic)
 {
     $struct.members : { member |$member_serialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$}; separator="\n"$
-    return writer->error == BUFFER_OK;
+    return writer->error;
 }
 
 bool $struct.cScopedname$_deserialize_topic(MicroBuffer* reader, $struct.cScopedname$* topic)
 {
     $struct.members : { member |$member_deserialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$}; separator="\n"$
-    return reader->error == BUFFER_OK;
+    return reader->error;
 }
 
 uint32_t $struct.cScopedname$_size_of_topic(const $struct.cScopedname$* topic, uint32_t size)
@@ -85,7 +85,7 @@ member_serialization(ctx, typecode, name, originName) ::= <<
 $if(typecode.primitive)$
 (void) serialize_$typecode.cTypename$(writer, topic->$name$);
 $elseif(typecode.isType_d)$
-(void) serialize_sequence_char(writer, topic->$name$, (uint32_t)strlen(topic->$name$) + 1);
+(void) serialize_string(writer, topic->$name$);
 $elseif(typecode.isType_e)$
 $sequence_serialization(ctx=ctx, typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$
@@ -135,8 +135,7 @@ member_deserialization(ctx, typecode, name, originName) ::= <<
 $if(typecode.primitive)$
 (void) deserialize_$typecode.cTypename$(reader, &topic->$name$);
 $elseif(typecode.isType_d)$
-uint32_t $originName$_length; //not used
-(void) deserialize_sequence_char(reader, topic->$name$, &$originName$_length);
+(void) deserialize_string(reader, topic->$name$, $typecode.maxsize$);
 $elseif(typecode.isType_e)$
 $sequence_deserialization(ctx=ctx, typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$
@@ -148,7 +147,7 @@ $endif$
 
 sequence_deserialization(ctx, typecode, name) ::= <<
 $if(typecode.contentTypeCode.primitive)$
-(void) deserialize_sequence_$typecode.cTypename$(reader, topic->$name$, &topic->$name$_size);
+(void) deserialize_sequence_$typecode.cTypename$(reader, topic->$name$, $typecode.maxsize$, &topic->$name$_size);
 $else$
 (void) deserialize_uint32_t(reader, &topic->$name$_size);
 for(int i = 0; i < topic->$name$_size; ++i)

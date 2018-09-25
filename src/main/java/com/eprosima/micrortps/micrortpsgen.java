@@ -14,7 +14,6 @@
 
 package com.eprosima.micrortps;
 
-import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,9 +24,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Vector;
-import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import org.antlr.stringtemplate.StringTemplate;
@@ -59,7 +56,6 @@ public class micrortpsgen {
     private Vector<String> m_idlFiles;
     protected static String m_appEnv = "MICRORTPSHOME";
     private boolean m_exampleOption = false;
-    private boolean write_access_profile_enabled = false;
     private boolean m_ppDisable = false; //TODO
     private boolean m_replace = false;
     private String m_ppPath = null;
@@ -94,9 +90,6 @@ public class micrortpsgen {
             }
             else if (arg.equals("-example")) {
                 m_exampleOption = true;
-            }
-            else if (arg.equals("-write-access-profile")) {
-                write_access_profile_enabled = true;
             }
             else if(arg.equals("-ppPath"))
             {
@@ -229,7 +222,6 @@ public class micrortpsgen {
         System.out.println("\twhere the options are:");
         System.out.println("\t\t-help: shows this help");
         System.out.println("\t\t-version: shows the current version of eProsima Micro RTPS.");
-        System.out.println("\t\t-write-access-profile: Generates a write function for the topic.");
         System.out.println("\t\t-example: Generates an example.");
         System.out.println("\t\t-replace: replaces existing generated files.");
         System.out.println("\t\t-ppDisable: disables the preprocessor.");
@@ -309,10 +301,6 @@ public class micrortpsgen {
             tmanager.addGroup("TypesHeader");
             tmanager.addGroup("TypesSource");
 
-            // Load write access profile
-            tmanager.addGroup("WriteAccessHeader");
-            tmanager.addGroup("WriteAccessSource");
-
             // Load Publisher template
             tmanager.addGroup("PublisherSource");
 
@@ -364,19 +352,6 @@ public class micrortpsgen {
                     System.out.println("Generating Serialization Test file...");
                     fileName = m_outputDir + idlFileNameOnly + "SerializationTest.c";
                     returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationTestSource"), m_replace);
-                    project.addCommonSrcFile(fileName);
-                }
-
-                if (ctx.existsLastStructure() && m_exampleOption || write_access_profile_enabled)
-                {
-                    System.out.println("Generating Write Access profile files...");
-
-                    fileName = m_outputDir + idlFileNameOnly + "Writer.h";
-                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("WriteAccessHeader"), m_replace);
-                    project.addCommonIncludeFile(fileName);
-
-                    fileName = m_outputDir + idlFileNameOnly + "Writer.c";
-                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("WriteAccessSource"), m_replace);
                     project.addCommonSrcFile(fileName);
                 }
 

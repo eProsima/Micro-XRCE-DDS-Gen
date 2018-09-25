@@ -46,7 +46,7 @@ add_executable($project.name$Subscriber $project.name$Subscriber.c \${SRCS})
 target_link_libraries($project.name$Subscriber micrortps_client)
 
 # $project.name$ Publisher
-add_executable($project.name$Publisher $project.name$Publisher.c $project.name$Writer.c \${SRCS})
+add_executable($project.name$Publisher $project.name$Publisher.c \${SRCS})
 target_link_libraries($project.name$Publisher micrortps_client)
 
 
