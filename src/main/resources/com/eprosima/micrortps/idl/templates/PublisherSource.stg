@@ -86,7 +86,7 @@ int main(void)
     {
         $ctx.lastStructure.cScopedname$ topic = {0};
 
-        MicroBuffer mb;
+        mcBuffer mb;
         uint32_t topic_size = $ctx.lastStructure.cScopedname$_size_of_topic(&topic, 0);
         mr_prepare_output_stream(&session, reliable_out, datawriter_id, &mb, topic_size);
         $ctx.lastStructure.cScopedname$_serialize_topic(&mb, &topic);
