@@ -77,10 +77,10 @@ typedef struct $struct.cScopedname$
     $struct.members:{$member_declaration(it)$}; separator="\n"$
 } $struct.cScopedname$;
 
-struct MicroBuffer;
+struct mcBuffer;
 
-bool $struct.cScopedname$_serialize_topic(struct MicroBuffer* writer, const $struct.cScopedname$* topic);
-bool $struct.cScopedname$_deserialize_topic(struct MicroBuffer* reader, $struct.cScopedname$* topic);
+bool $struct.cScopedname$_serialize_topic(struct mcBuffer* writer, const $struct.cScopedname$* topic);
+bool $struct.cScopedname$_deserialize_topic(struct mcBuffer* reader, $struct.cScopedname$* topic);
 uint32_t $struct.cScopedname$_size_of_topic(const $struct.cScopedname$* topic, uint32_t size);
 
 >>

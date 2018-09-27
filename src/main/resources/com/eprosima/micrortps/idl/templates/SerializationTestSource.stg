@@ -38,17 +38,17 @@ int test$ctx.lastStructure.name$()
     initialize$ctx.lastStructure.name$(&$ctx.lastStructure.name$_serialization_topic);
 
     uint8_t buffer[BUFFER_SIZE];
-    MicroBuffer mb;
+    mcBuffer mb;
 
-    init_micro_buffer(&mb, buffer, BUFFER_SIZE);
+    mc_init_buffer(&mb, buffer, BUFFER_SIZE);
     $ctx.lastStructure.name$_serialize_topic(&mb, &$ctx.lastStructure.name$_serialization_topic);
 
-    reset_micro_buffer(&mb);
+    mc_reset_buffer(&mb);
     $ctx.lastStructure.name$_deserialize_topic(&mb, &$ctx.lastStructure.name$_deserialization_topic);
 
     uint32_t $ctx.lastStructure.name$_serialization_topic_size = $ctx.lastStructure.name$_size_of_topic(&$ctx.lastStructure.name$_serialization_topic, 0);
     uint32_t $ctx.lastStructure.name$_deserialization_topic_size = $ctx.lastStructure.name$_size_of_topic(&$ctx.lastStructure.name$_deserialization_topic, 0);
-    uint32_t buffer_length = micro_buffer_length(&mb);
+    uint32_t buffer_length = mc_buffer_length(&mb);
 
     int topic_equal = 0 == memcmp(&$ctx.lastStructure.name$_serialization_topic, &$ctx.lastStructure.name$_deserialization_topic, sizeof($ctx.lastStructure.name$));
     int size_equal = $ctx.lastStructure.name$_serialization_topic_size == $ctx.lastStructure.name$_deserialization_topic_size; 
@@ -61,7 +61,7 @@ int test$ctx.lastStructure.name$()
     printf("===== After deserialize: =====\n");
     print$ctx.lastStructure.name$(&$ctx.lastStructure.name$_deserialization_topic);
     printf("\n");
-    printf("MicroBuffer: \n");
+    printf("mcBuffer: \n");
     printf("length: %d\n", buffer_length);
     printf("data: ");
     for(int i = 0; i < buffer_length; ++i)

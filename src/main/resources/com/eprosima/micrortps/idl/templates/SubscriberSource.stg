@@ -31,7 +31,7 @@ const char* topic_xml =
 const char* subscriber_xml = "<subscriber name=\"MySubscriber\"";
 const char* datareader_xml = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>$if(ctx.lastStructure.typeCode.hasKey)$WITH_KEY$else$NO_KEY$endif$</kind><name>$ctx.filename$PubSubTopic</name><dataType>$ctx.lastStructure.scopedname$</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
 
-void on_topic(mrSession* session, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct MicroBuffer* mb, void* args)
+void on_topic(mrSession* session, mrObjectId object_id, uint16_t request_id, mrStreamId stream_id, struct mcBuffer* mb, void* args)
 {
     (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) args;
 
