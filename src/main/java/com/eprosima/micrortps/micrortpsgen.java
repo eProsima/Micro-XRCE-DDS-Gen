@@ -54,7 +54,7 @@ import com.eprosima.log.ColorMessage;
 public class micrortpsgen {
 
     private Vector<String> m_idlFiles;
-    protected static String m_appEnv = "MICRORTPSHOME";
+    protected static String m_appEnv = "MICROXRCEHOME";
     private boolean m_exampleOption = false;
     private boolean m_ppDisable = false; //TODO
     private boolean m_replace = false;
@@ -63,7 +63,7 @@ public class micrortpsgen {
     private String m_outputDir = m_defaultOutputDir;
     private String m_tempDir = null;
     protected static String m_appName = "micrortpsgen";
-    protected boolean m_test = false; 
+    protected boolean m_test = false;
 
     protected static String m_localAppProduct = "micrortps";
     private ArrayList<String> m_includePaths = new ArrayList<String>();
@@ -201,14 +201,14 @@ public class micrortpsgen {
     {
         try
         {
-            String classPath = getClass().getResource(getClass().getSimpleName() + ".class").toString(); 
-            String libPath = classPath.substring(0, classPath.lastIndexOf("!")); 
-            String filePath = libPath + "!/META-INF/MANIFEST.MF"; 
-            Manifest manifest = new Manifest(new URL(filePath).openStream()); 
+            String classPath = getClass().getResource(getClass().getSimpleName() + ".class").toString();
+            String libPath = classPath.substring(0, classPath.lastIndexOf("!"));
+            String filePath = libPath + "!/META-INF/MANIFEST.MF";
+            Manifest manifest = new Manifest(new URL(filePath).openStream());
             String version = manifest.getMainAttributes().getValue("Specification-Version");
 
             System.out.println(m_appName + " version: " + version);
-        } 
+        }
         catch (IOException e)
         {
             e.printStackTrace();
@@ -221,7 +221,7 @@ public class micrortpsgen {
         System.out.println("\t" + m_appName + " [options] <file> [<file> ...]");
         System.out.println("\twhere the options are:");
         System.out.println("\t\t-help: shows this help");
-        System.out.println("\t\t-version: shows the current version of eProsima Micro RTPS.");
+        System.out.println("\t\t-version: shows the current version of eProsima Micro RTPS Gen.");
         System.out.println("\t\t-example: Generates an example.");
         System.out.println("\t\t-replace: replaces existing generated files.");
         System.out.println("\t\t-ppDisable: disables the preprocessor.");

@@ -18,7 +18,7 @@ main(ctx, definitions) ::= <<
 $fileHeader(ctx=ctx,  file=[ctx.filename, "SerializationTest.c"], description=["This file contains serialization test code."])$
 
 #include "$ctx.filename$.h"
-#include <microcdr/microcdr.h>
+#include <ucdr/microcdr.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,20 +38,20 @@ int test$ctx.lastStructure.name$()
     initialize$ctx.lastStructure.name$(&$ctx.lastStructure.name$_serialization_topic);
 
     uint8_t buffer[BUFFER_SIZE];
-    mcBuffer mb;
+    ucdrBuffer mb;
 
-    mc_init_buffer(&mb, buffer, BUFFER_SIZE);
+    ucdr_init_buffer(&mb, buffer, BUFFER_SIZE);
     $ctx.lastStructure.name$_serialize_topic(&mb, &$ctx.lastStructure.name$_serialization_topic);
 
-    mc_reset_buffer(&mb);
+    ucdr_reset_buffer(&mb);
     $ctx.lastStructure.name$_deserialize_topic(&mb, &$ctx.lastStructure.name$_deserialization_topic);
 
     uint32_t $ctx.lastStructure.name$_serialization_topic_size = $ctx.lastStructure.name$_size_of_topic(&$ctx.lastStructure.name$_serialization_topic, 0);
     uint32_t $ctx.lastStructure.name$_deserialization_topic_size = $ctx.lastStructure.name$_size_of_topic(&$ctx.lastStructure.name$_deserialization_topic, 0);
-    uint32_t buffer_length = mc_buffer_length(&mb);
+    uint32_t buffer_length = ucdr_buffer_length(&mb);
 
     int topic_equal = 0 == memcmp(&$ctx.lastStructure.name$_serialization_topic, &$ctx.lastStructure.name$_deserialization_topic, sizeof($ctx.lastStructure.name$));
-    int size_equal = $ctx.lastStructure.name$_serialization_topic_size == $ctx.lastStructure.name$_deserialization_topic_size; 
+    int size_equal = $ctx.lastStructure.name$_serialization_topic_size == $ctx.lastStructure.name$_deserialization_topic_size;
     size_equal = size_equal && $ctx.lastStructure.name$_serialization_topic_size == buffer_length;
 
     printf("\n");
@@ -61,7 +61,7 @@ int test$ctx.lastStructure.name$()
     printf("===== After deserialize: =====\n");
     print$ctx.lastStructure.name$(&$ctx.lastStructure.name$_deserialization_topic);
     printf("\n");
-    printf("mcBuffer: \n");
+    printf("ucdrBuffer: \n");
     printf("length: %d\n", buffer_length);
     printf("data: ");
     for(int i = 0; i < buffer_length; ++i)
@@ -103,7 +103,7 @@ union_type(ctx, parent, union) ::= <<>>
 enum_type(ctx, parent, enum) ::= <<>>
 
 // ========================================================================================
-//                                      ASSIGNMENT 
+//                                      ASSIGNMENT
 // ========================================================================================
 member_assignment(typecode, name, originName) ::= <<
 $if(typecode.primitive)$
@@ -125,7 +125,7 @@ $if(typecode.contentTypeCode.primitive)$
 memset(topic->$name$, rand(), topic->$name$_size * $typecode.contentTypeCode.size$);
 $else$
 for(int i = 0; i < topic->$name$_size; ++i)
-{    
+{
     $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
 }
 $endif$
@@ -141,19 +141,19 @@ $elseif(typecode.contentTypeCode.primitive)$
 memset(topic->$name$, rand(), sizeof(topic->$name$));
 $elseif(typecode.contentTypeCode.isType_d)$
 for(int i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
-{    
+{
     $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
 }
 $else$
 for(int i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
-{    
+{
     $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
 }
 $endif$
 >>
 
 // ========================================================================================
-//                                         PRINT 
+//                                         PRINT
 // ========================================================================================
 member_print(typecode, name, originName) ::= <<
 $if(typecode.primitive)$
@@ -177,7 +177,7 @@ $print_sequence(name)$
 $else$
 printf("$name$: \n");
 for(int i = 0; i < topic->$name$_size; ++i)
-{    
+{
     $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
 }
 $endif$
@@ -196,13 +196,13 @@ $print_array(typecode=typecode, name=name)$
 $elseif(typecode.contentTypeCode.isType_d)$
 printf("$name$: \n");
 for(int i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
-{    
+{
     $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
 }
 $else$
 printf("$name$: \n");
 for(int i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
-{    
+{
     $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
 }
 $endif$

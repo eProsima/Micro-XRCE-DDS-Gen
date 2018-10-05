@@ -23,7 +23,7 @@ public class MicroRTPSGenIntegrationTest
         ArrayList<String[]> commands = new ArrayList<String[]>();
         commands.add(new String[]{"mkdir -p " + OUTPUT_PATH, "."});
         commands.add(new String[]{"rm -rf micro-RTPS-client", OUTPUT_PATH});
-        commands.add(new String[]{"git clone git@github.com:eProsima/micro-RTPS-client.git", OUTPUT_PATH});
+        commands.add(new String[]{"git clone -b feature/prefix_change git@github.com:eProsima/micro-RTPS-client.git", OUTPUT_PATH});
         commands.add(new String[]{"mkdir build", OUTPUT_PATH + "/micro-RTPS-client"});
         commands.add(new String[]{"cmake .. -DTHIRDPARTY=ON -DCMAKE_INSTALL_PREFIX=install", OUTPUT_PATH + "/micro-RTPS-client/build"});
         commands.add(new String[]{"make install", OUTPUT_PATH + "/micro-RTPS-client/build"});
