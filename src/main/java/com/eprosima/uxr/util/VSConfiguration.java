@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.eprosima.micrortps.util;
+package com.eprosima.uxr.util;
 
 public class VSConfiguration {
 

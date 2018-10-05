@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.eprosima.micrortps.idl.grammar;
+package com.eprosima.uxr.idl.grammar;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -21,9 +21,9 @@ import com.eprosima.idl.parser.tree.Interface;
 import com.eprosima.idl.parser.tree.TypeDeclaration;
 import com.eprosima.idl.parser.tree.Annotation;
 import com.eprosima.idl.parser.typecode.TypeCode;
-import com.eprosima.micrortps.idl.parser.typecode.StructTypeCode;
+import com.eprosima.uxr.idl.parser.typecode.StructTypeCode;
 
-public class Context extends com.eprosima.idl.context.Context implements com.eprosima.micrortps.idl.context.Context
+public class Context extends com.eprosima.idl.context.Context implements com.eprosima.uxr.idl.context.Context
 {
     public Context(String filename, String file, ArrayList<String> includePaths, boolean subscribercode, boolean publishercode)
     {
@@ -120,12 +120,12 @@ public class Context extends com.eprosima.idl.context.Context implements com.epr
 
     public String getProduct()
     {
-        return "micrortps";
+        return "microxrcedds";
     }
 
     public String getNamespace()
     {
-        return "micrortps";
+        return "microxrcedds";
     }
 
     public boolean isCdr()

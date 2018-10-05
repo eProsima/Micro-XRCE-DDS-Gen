@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.eprosima.micrortps;
+package com.eprosima.uxr;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,11 +34,11 @@ import org.antlr.stringtemplate.language.DefaultTemplateLexer;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 
-import com.eprosima.micrortps.exceptions.BadArgumentException;
-import com.eprosima.micrortps.idl.grammar.Context;
+import com.eprosima.uxr.exceptions.BadArgumentException;
+import com.eprosima.uxr.idl.grammar.Context;
 import com.eprosima.solution.Project;
 import com.eprosima.solution.Solution;
-import com.eprosima.micrortps.util.Utils;
+import com.eprosima.uxr.util.Utils;
 import com.eprosima.idl.generator.manager.TemplateGroup;
 import com.eprosima.idl.generator.manager.TemplateManager;
 import com.eprosima.idl.parser.grammar.IDLLexer;
@@ -51,10 +51,10 @@ import com.eprosima.idl.parser.typecode.TypeCode;
 import com.eprosima.idl.util.Util;
 import com.eprosima.log.ColorMessage;
 
-public class micrortpsgen {
+public class microxrceddsgen {
 
     private Vector<String> m_idlFiles;
-    protected static String m_appEnv = "MICROXRCEHOME";
+    protected static String m_appEnv = "MICROXRCEDDSHOME";
     private boolean m_exampleOption = false;
     private boolean m_ppDisable = false; //TODO
     private boolean m_replace = false;
@@ -62,15 +62,15 @@ public class micrortpsgen {
     private final String m_defaultOutputDir = "." + File.separator;
     private String m_outputDir = m_defaultOutputDir;
     private String m_tempDir = null;
-    protected static String m_appName = "micrortpsgen";
+    protected static String m_appName = "microxrceddsgen";
     protected boolean m_test = false;
 
-    protected static String m_localAppProduct = "micrortps";
+    protected static String m_localAppProduct = "microxrcedds";
     private ArrayList<String> m_includePaths = new ArrayList<String>();
 
     private String m_os = null;
 
-    public micrortpsgen(String [] args) throws BadArgumentException {
+    public microxrceddsgen(String [] args) throws BadArgumentException {
 
         int count = 0;
         String arg;
@@ -173,7 +173,7 @@ public class micrortpsgen {
 
             // Load string templates
             System.out.println("Loading templates...");
-            TemplateManager.setGroupLoaderDirectories("com/eprosima/micrortps/idl/templates");
+            TemplateManager.setGroupLoaderDirectories("com/eprosima/uxr/idl/templates");
 
             for (int count = 0; returnedValue && (count < m_idlFiles.size()); ++count) {
                 Project project = process(m_idlFiles.get(count));
@@ -221,7 +221,7 @@ public class micrortpsgen {
         System.out.println("\t" + m_appName + " [options] <file> [<file> ...]");
         System.out.println("\twhere the options are:");
         System.out.println("\t\t-help: shows this help");
-        System.out.println("\t\t-version: shows the current version of eProsima Micro RTPS Gen.");
+        System.out.println("\t\t-version: shows the current version of eProsima Micro XRCE-DDS Gen.");
         System.out.println("\t\t-example: Generates an example.");
         System.out.println("\t\t-replace: replaces existing generated files.");
         System.out.println("\t\t-ppDisable: disables the preprocessor.");
@@ -504,7 +504,7 @@ public class micrortpsgen {
 
         try {
 
-            micrortpsgen main = new micrortpsgen(args);
+            microxrceddsgen main = new microxrceddsgen(args);
             if (main.execute()) {
                 System.exit(0);
             }

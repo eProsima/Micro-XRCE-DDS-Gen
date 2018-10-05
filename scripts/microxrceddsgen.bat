@@ -27,4 +27,4 @@ if not %ERRORLEVEL%==0 (
    )
 )
 
-%java_exec% -jar "%dir%\..\share\micrortps\micrortpsgen.jar" %args%
+%java_exec% -jar "%dir%\..\share\microxrcedds\microxrceddsgen.jar" %args%
