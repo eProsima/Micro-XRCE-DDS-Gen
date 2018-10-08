@@ -19,11 +19,18 @@ public class MicroXRCEDDSGenIntegrationTest
     @Test
     public void runTests()
     {
+        // Get client's branch against test will compile.
+        String branch = System.getProperty("branch");
+        if(branch == null || branch.isEmpty())
+        {
+            branch = "master";
+        }
+
         //Configure Micro XRCE-DDS client for the tests
         ArrayList<String[]> commands = new ArrayList<String[]>();
         commands.add(new String[]{"mkdir -p " + OUTPUT_PATH, "."});
         commands.add(new String[]{"rm -rf micro-XRCE-DDS-client", OUTPUT_PATH});
-        commands.add(new String[]{"git clone -b feature/prefix_change git@github.com:eProsima/micro-XRCE-DDS-client.git", OUTPUT_PATH});
+        commands.add(new String[]{"git clone -b " + branch + " git@github.com:eProsima/micro-XRCE-DDS-client.git", OUTPUT_PATH});
         commands.add(new String[]{"mkdir build", OUTPUT_PATH + "/micro-XRCE-DDS-client"});
         commands.add(new String[]{"cmake .. -DTHIRDPARTY=ON -DCMAKE_INSTALL_PREFIX=install", OUTPUT_PATH + "/micro-XRCE-DDS-client/build"});
         commands.add(new String[]{"make install", OUTPUT_PATH + "/micro-XRCE-DDS-client/build"});

@@ -65,6 +65,7 @@ compileJava {
 }
 
 test {
+    systemProperty 'branch', System.getProperty('branch')
     useJUnit()
 }
 
