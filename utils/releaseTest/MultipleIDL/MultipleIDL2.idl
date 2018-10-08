@@ -1,5 +1,0 @@
-struct MYSTRUCT2
-{
-	long value;
-	string message;
-};

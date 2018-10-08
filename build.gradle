@@ -16,7 +16,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse' // Eclipse integration
 
 version = '1.0.0beta2'
-description = 'Build script with all necessary tasks to compile and test MicroRTPSGen'
+description = 'Build script with all necessary tasks to compile and test MicroXRCEDDSGen'
 
 repositories {
     mavenCentral()
@@ -50,11 +50,11 @@ sourceSets {
 
 jar {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    baseName = 'micrortpsgen'
+    baseName = 'microxrceddsgen'
     archiveName = "${jar.baseName}.${jar.extension}"
-    destinationDir = file(new File(projectDir, 'share/micrortps'))
+    destinationDir = file(new File(projectDir, 'share/microxrcedds'))
     manifest {
-        attributes("Created-By": "eProsima", "Main-Class": "com.eprosima.micrortps.micrortpsgen", "Specification-Version": version)
+        attributes("Created-By": "eProsima", "Main-Class": "com.eprosima.uxr.microxrceddsgen", "Specification-Version": version)
     }
 }
 
@@ -65,6 +65,7 @@ compileJava {
 }
 
 test {
+    systemProperty 'branch', System.getProperty('branch')
     useJUnit()
 }
 

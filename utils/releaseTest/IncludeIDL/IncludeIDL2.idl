@@ -1,7 +1,0 @@
-#include "IncludeIDL1.idl"
-
-
-struct S2
-{
-	S1 astru;
-};

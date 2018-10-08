@@ -1,5 +1,0 @@
-struct StringContainer
-{
-    string str1;
-    string<1024> str2;
-};
