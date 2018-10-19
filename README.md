@@ -17,7 +17,7 @@ You can access Micro XRCE-DDS documentation online, which is hosted on Read the 
 
 * [Start Page](http://micro-xrce-dds.readthedocs.io)
 * [Installation manual](http://micro-xrce-dds.readthedocs.io/en/latest/installation.html)
-* [User manual](http://micro-xrce-dds.readthedocs.io/en/latest/introduction.html)
+* [Tool manual](http://micro-xrce-dds.readthedocs.io/en/latest/gen.html)
 
 ## Getting Help
 
