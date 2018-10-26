@@ -59,7 +59,7 @@ void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, u
     $ctx.lastStructure.cScopedname$ topic;
     $ctx.lastStructure.cScopedname$_deserialize_topic(mb, &topic);
 
-    printf("Received topic");
+    printf("Received topic\n");
 }
 
 int main(void)

@@ -114,7 +114,8 @@ int main(void)
         uxr_prepare_output_stream(&session, reliable_out, datawriter_id, &mb, topic_size);
         $ctx.lastStructure.cScopedname$_serialize_topic(&mb, &topic);
 
-        uxr_run_session_until_timeout(&session, 1000);
+        //send and wait one second
+        uxr_run_session_time(&session, 1000);
     }
 
     // Delete resources
