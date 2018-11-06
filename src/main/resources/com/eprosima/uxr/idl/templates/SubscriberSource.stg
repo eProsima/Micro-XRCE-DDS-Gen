@@ -15,7 +15,7 @@
 group ProtocolHeader;
 
 main(ctx, definitions) ::= <<
-$fileHeader(ctx=ctx,  file=[ctx.filename, "Subscriber.c"], description=["This file contains the implementation of the publisher functions."])$
+$fileHeader(ctx=ctx,  file=[ctx.filename, "Subscriber.c"], description=["Subscriber example."])$
 
 #include "$ctx.filename$.h"
 #include <uxr/client/client.h>
@@ -26,10 +26,30 @@ $fileHeader(ctx=ctx,  file=[ctx.filename, "Subscriber.c"], description=["This fi
 
 $definitions; separator="\n"$
 
-const char* topic_xml =
-"<dds><topic>$if(ctx.lastStructure.typeCode.hasKey)$<kind>WITH_KEY</kind>$endif$<name>$ctx.filename$PubSubTopic</name><dataType>$ctx.lastStructure.scopedname$</dataType></topic></dds>";
-const char* subscriber_xml = "<subscriber name=\"MySubscriber\"";
-const char* datareader_xml = "<profiles><subscriber profile_name=\"default_xrce_subscriber_profile\"><topic><kind>$if(ctx.lastStructure.typeCode.hasKey)$WITH_KEY$else$NO_KEY$endif$</kind><name>$ctx.filename$PubSubTopic</name><dataType>$ctx.lastStructure.scopedname$</dataType><historyQos><kind>KEEP_LAST</kind><depth>5</depth></historyQos><durability><kind>TRANSIENT_LOCAL</kind></durability></topic></subscriber></profiles>";
+const char* participant_xml = "<dds>"
+                                  "<participant>"
+                                      "<rtps>"
+                                          "<name>default_xrce_participant</name>"
+                                      "</rtps>"
+                                  "</participant>"
+                              "</dds>";
+const char* topic_xml = "<dds>"
+                            "<topic>"
+                                $if(ctx.lastStructure.typeCode.hasKey)$"<kind>WITH_KEY</kind>"$endif$
+                                "<name>$ctx.filename$PubSubTopic</name>"
+                                "<dataType>$ctx.lastStructure.scopedname$</dataType>"
+                            "</topic>"
+                        "</dds>";
+const char* subscriber_xml = "";
+const char* datareader_xml = "<dds>"
+                                 "<data_reader>"
+                                     "<topic>"
+                                         "<kind>$if(ctx.lastStructure.typeCode.hasKey)$WITH_KEY$else$NO_KEY$endif$</kind>"
+                                         "<name>$ctx.filename$PubSubTopic</name>"
+                                         "<dataType>$ctx.lastStructure.scopedname$</dataType>"
+                                     "</topic>"
+                                 "</data_reader>"
+                             "</dds>";
 
 void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* mb, void* args)
 {
@@ -38,14 +58,15 @@ void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, u
     $ctx.lastStructure.cScopedname$ topic;
     $ctx.lastStructure.cScopedname$_deserialize_topic(mb, &topic);
 
-    printf("Received topic");
+    printf("Received topic\n");
 }
 
 int main(void)
 {
     // Transport
     uxrUDPTransport transport;
-    if(!uxr_init_udp_transport(&transport, "127.0.0.1", 2018))
+    uxrUDPPlatform udp_platform;
+    if(!uxr_init_udp_transport(&transport, &udp_platform, "127.0.0.1", 2018))
     {
         printf("Error at create transport.\n");
         return 1;
@@ -70,16 +91,16 @@ int main(void)
 
     // Create entities
     uxrObjectId participant_id = uxr_object_id(0x01, UXR_PARTICIPANT_ID);
-    uint16_t participant_req = uxr_write_create_participant_ref(&session, reliable_out, participant_id, 0, "default participant", UXR_REPLACE);
+    uint16_t participant_req = uxr_buffer_create_participant_xml(&session, reliable_out, participant_id, 0, participant_xml, UXR_REPLACE);
 
     uxrObjectId topic_id = uxr_object_id(0x01, UXR_TOPIC_ID);
-    uint16_t topic_req = uxr_write_configure_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, UXR_REPLACE);
+    uint16_t topic_req = uxr_buffer_create_topic_xml(&session, reliable_out, topic_id, participant_id, topic_xml, UXR_REPLACE);
 
     uxrObjectId subscriber_id = uxr_object_id(0x01, UXR_SUBSCRIBER_ID);
-    uint16_t subscriber_req = uxr_write_configure_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, UXR_REPLACE);
+    uint16_t subscriber_req = uxr_buffer_create_subscriber_xml(&session, reliable_out, subscriber_id, participant_id, subscriber_xml, UXR_REPLACE);
 
     uxrObjectId datareader_id = uxr_object_id(0x01, UXR_DATAREADER_ID);
-    uint16_t datareader_req = uxr_write_configure_datareader_xml(&session, reliable_out, datareader_id, subscriber_id, datareader_xml, UXR_REPLACE);
+    uint16_t datareader_req = uxr_buffer_create_datareader_xml(&session, reliable_out, datareader_id, subscriber_id, datareader_xml, UXR_REPLACE);
 
     // Send create entities message and wait its status
     uint8_t status[4];
@@ -93,7 +114,7 @@ int main(void)
     // Request topics
     uxrDeliveryControl delivery_control = {0};
     delivery_control.max_samples = UXR_MAX_SAMPLES_UNLIMITED;
-    uint16_t read_data_req = uxr_write_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
+    uint16_t read_data_req = uxr_buffer_request_data(&session, reliable_out, datareader_id, reliable_in, &delivery_control);
 
     // Read topics
     while(true)

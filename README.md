@@ -9,7 +9,7 @@ The *Micro XRCE-DDS Gen* provides a tool for generate serialization topic code f
 Although this tool is intended to be used with *Micro XRCE-DDS Client* library,
 the code generated does not depend of it and can be used externally with the only dependence of *Micro CDR*, used for native serializations.
 
-<p align="center"> <img src="docs/general_architecture.svg" alt="Image"/> </p>
+<p align="center"> <img src="docs/general_architecture.png" alt="Image"/> </p>
 
 ## Documentation
 
