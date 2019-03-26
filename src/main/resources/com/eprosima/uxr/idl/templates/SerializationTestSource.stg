@@ -78,6 +78,7 @@ int test$ctx.lastStructure.name$()
 
 int main(void)
 {
+    srand((unsigned) time(NULL));
     return test$ctx.lastStructure.name$() ? 0 : 1;
 }
 
