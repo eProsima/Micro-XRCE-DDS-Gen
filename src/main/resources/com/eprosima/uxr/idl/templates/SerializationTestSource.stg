@@ -107,7 +107,9 @@ enum_type(ctx, parent, enum) ::= <<>>
 //                                      ASSIGNMENT
 // ========================================================================================
 member_assignment(typecode, name, originName) ::= <<
-$if(typecode.primitive)$
+$if(typecode.isType_7)$
+memset(&topic->$name$, rand() & 1, sizeof(topic->$name$));
+$elseif(typecode.primitive)$
 memset(&topic->$name$, rand(), sizeof(topic->$name$));
 $elseif(typecode.isType_d)$
 strcpy(topic->$name$, "AAAAA");
