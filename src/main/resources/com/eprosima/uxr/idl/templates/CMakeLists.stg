@@ -26,13 +26,6 @@ project(client_examples)
 find_package(microcdr REQUIRED)
 find_package(microxrcedds_client REQUIRED)
 
-# Warnings
-if(MSVC OR MSVC_IDE)
-    set(CMAKE_C_FLAGS "\${CMAKE_C_FLAGS} /W4 /wd4700 /wd4996 /wd4820 /wd4255 /wd4668")
-else()
-    set(CMAKE_C_FLAGS "\${CMAKE_C_FLAGS} -pedantic -fstrict-aliasing -Wall -Wcast-align -Wshadow")
-endif()
-
 set(SRCS
     $solution.projects : {$it.name$.c}; separator="\n"$
     )
@@ -44,16 +37,48 @@ execs(project, libraries, examples, test) ::= <<
 # $project.name$ Subscriber
 add_executable($project.name$Subscriber $project.name$Subscriber.c \${SRCS})
 target_link_libraries($project.name$Subscriber microxrcedds_client)
+set_target_properties($project.name$Subscriber PROPERTIES
+    C_STANDARD
+        99
+    C_STANDARD_REQUIRED
+        YES
+    )
+target_compile_options($project.name$Subscriber
+    PRIVATE
+        \$<\$<C_COMPILER_ID:MSVC>:/W4 /wd4700 /wd4996 /wd4820 /wd4255 /wd4668>
+        \$<\$<C_COMPILER_ID:GNU>:-pedantic -fstrict-aliasing -Wall -Wcast-align -Wshadow>
+    )
 
 # $project.name$ Publisher
 add_executable($project.name$Publisher $project.name$Publisher.c \${SRCS})
 target_link_libraries($project.name$Publisher microxrcedds_client)
-
+set_target_properties($project.name$Publisher PROPERTIES
+    C_STANDARD
+        99
+    C_STANDARD_REQUIRED
+        YES
+    )
+target_compile_options($project.name$Publisher
+    PRIVATE
+        \$<\$<C_COMPILER_ID:MSVC>:/W4 /wd4700 /wd4996 /wd4820 /wd4255 /wd4668>
+        \$<\$<C_COMPILER_ID:GNU>:-pedantic -fstrict-aliasing -Wall -Wcast-align -Wshadow>
+    )
 
 $if(test)$
 # $project.name$ Serialization Test
 add_executable($project.name$SerializationTest $project.name$SerializationTest.c \${SRCS})
 target_link_libraries($project.name$SerializationTest microxrcedds_client)
+set_target_properties($project.name$SerializationTest PROPERTIES
+    C_STANDARD
+        99
+    C_STANDARD_REQUIRED
+        YES
+    )
+target_compile_options($project.name$SerializationTest
+    PRIVATE
+        \$<\$<C_COMPILER_ID:MSVC>:/W4 /wd4700 /wd4996 /wd4820 /wd4255 /wd4668>
+        \$<\$<C_COMPILER_ID:GNU>:-pedantic -fstrict-aliasing -Wall -Wcast-align -Wshadow>
+    )
 
 $endif$
 >>
