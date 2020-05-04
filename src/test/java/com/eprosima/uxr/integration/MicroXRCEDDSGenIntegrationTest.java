@@ -44,7 +44,7 @@ public class MicroXRCEDDSGenIntegrationTest
         commands.add(new String[]{"rm -rf Micro-XRCE-DDS-Client", OUTPUT_PATH});
         commands.add(new String[]{"git clone -b " + branch + " https://github.com/eProsima/Micro-XRCE-DDS-Client.git", OUTPUT_PATH});
         commands.add(new String[]{"mkdir build", OUTPUT_PATH + "/Micro-XRCE-DDS-Client"});
-        commands.add(new String[]{"cmake .. -DTHIRDPARTY=ON -DCMAKE_INSTALL_PREFIX=install", OUTPUT_PATH + "/Micro-XRCE-DDS-Client/build"});
+        commands.add(new String[]{"cmake .. -DCMAKE_INSTALL_PREFIX=install", OUTPUT_PATH + "/Micro-XRCE-DDS-Client/build"});
         commands.add(new String[]{"make", OUTPUT_PATH + "/Micro-XRCE-DDS-Client/build"});
         commands.add(new String[]{"make install", OUTPUT_PATH + "/Micro-XRCE-DDS-Client/build"});
 

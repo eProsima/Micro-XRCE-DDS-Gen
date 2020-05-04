@@ -78,6 +78,7 @@ int test$ctx.lastStructure.name$()
 
 int main(void)
 {
+    srand((unsigned) time(NULL));
     return test$ctx.lastStructure.name$() ? 0 : 1;
 }
 
@@ -106,8 +107,10 @@ enum_type(ctx, parent, enum) ::= <<>>
 //                                      ASSIGNMENT
 // ========================================================================================
 member_assignment(typecode, name, originName) ::= <<
-$if(typecode.primitive)$
-memset(&topic->$name$, ($typecode.cTypename$)rand(), sizeof(topic->$name$));
+$if(typecode.isType_7)$
+memset(&topic->$name$, rand() & 1, sizeof(topic->$name$));
+$elseif(typecode.primitive)$
+memset(&topic->$name$, rand(), sizeof(topic->$name$));
 $elseif(typecode.isType_d)$
 strcpy(topic->$name$, "AAAAA");
 $elseif(typecode.isType_e)$
