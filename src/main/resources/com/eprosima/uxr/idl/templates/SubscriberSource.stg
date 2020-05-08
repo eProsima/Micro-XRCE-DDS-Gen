@@ -51,9 +51,16 @@ const char* datareader_xml = "<dds>"
                                  "</data_reader>"
                              "</dds>";
 
-void on_topic(uxrSession* session, uxrObjectId object_id, uint16_t request_id, uxrStreamId stream_id, struct ucdrBuffer* mb, void* args)
+void on_topic(
+        uxrSession* session,
+        uxrObjectId object_id,
+        uint16_t request_id,
+        uxrStreamId stream_id,
+        struct ucdrBuffer* mb,
+        uint16_t length,
+        void* args)
 {
-    (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) args;
+    (void) session; (void) object_id; (void) request_id; (void) stream_id; (void) length; (void) args;
 
     $ctx.lastStructure.cScopedname$ topic;
     $ctx.lastStructure.cScopedname$_deserialize_topic(mb, &topic);
@@ -66,7 +73,7 @@ int main(void)
     // Transport
     uxrUDPTransport transport;
     uxrUDPPlatform udp_platform;
-    if(!uxr_init_udp_transport(&transport, &udp_platform, "127.0.0.1", 2018))
+    if(!uxr_init_udp_transport(&transport, &udp_platform, UXR_IPv4, "127.0.0.1", "2018"))
     {
         printf("Error at create transport.\n");
         return 1;
