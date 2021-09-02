@@ -39,6 +39,7 @@ sourceSets {
         }
         resources {
             srcDir 'src/main/resources'
+            include '**/*.stg'
         }
     }
     test {
@@ -60,13 +61,11 @@ jar {
 
 compileJava.dependsOn buildIDLParser
 compileJava {
-    sourceCompatibility = 1.6
-    targetCompatibility = 1.6
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 }
 
 test {
     systemProperty 'branch', System.getProperty('branch')
     useJUnit()
 }
-
-
