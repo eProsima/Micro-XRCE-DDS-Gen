@@ -47,7 +47,7 @@ import com.eprosima.idl.parser.tree.Specification;
 import com.eprosima.idl.parser.tree.AnnotationDeclaration;
 import com.eprosima.idl.parser.tree.AnnotationMember;
 import com.eprosima.idl.parser.typecode.PrimitiveTypeCode;
-import com.eprosima.idl.parser.typecode.TypeCode;
+import com.eprosima.idl.parser.typecode.Kind;
 import com.eprosima.idl.util.Util;
 import com.eprosima.log.ColorMessage;
 
@@ -64,6 +64,7 @@ public class microxrceddsgen {
     private String m_tempDir = null;
     protected static String m_appName = "microxrceddsgen";
     protected boolean m_test = false;
+    private boolean m_typesc = false;
 
     protected static String m_localAppProduct = "microxrcedds";
     private ArrayList<String> m_includePaths = new ArrayList<String>();
@@ -110,6 +111,8 @@ public class microxrceddsgen {
                 }
             } else if (arg.equals("-test")) {
                 m_test = true;
+            } else if(arg.equals("-typesc")) {
+                m_typesc = true;
             } else if (arg.equals("-version")) {
                 showVersion();
                 System.exit(0);
@@ -288,14 +291,14 @@ public class microxrceddsgen {
 
             // Create default @Key annotation.
             AnnotationDeclaration keyann = ctx.createAnnotationDeclaration("Key", null);
-            keyann.addMember(new AnnotationMember("value", new PrimitiveTypeCode(TypeCode.KIND_BOOLEAN), "true"));
+            keyann.addMember(new AnnotationMember("value", new PrimitiveTypeCode(Kind.KIND_BOOLEAN), "true"));
 
             // Create default @Topic annotation.
             AnnotationDeclaration topicann = ctx.createAnnotationDeclaration("Topic", null);
-            topicann.addMember(new AnnotationMember("value", new PrimitiveTypeCode(TypeCode.KIND_BOOLEAN), "true"));
+            topicann.addMember(new AnnotationMember("value", new PrimitiveTypeCode(Kind.KIND_BOOLEAN), "true"));
 
             // Create template manager
-            TemplateManager tmanager = new TemplateManager("Common");
+            TemplateManager tmanager = new TemplateManager("Common", ctx, m_typesc);
 
             // Load common types template
             tmanager.addGroup("TypesHeader");
