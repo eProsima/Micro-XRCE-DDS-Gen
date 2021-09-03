@@ -30,36 +30,36 @@ $fileHeader(ctx=ctx,  file=[ctx.filename, "SerializationTest.c"], description=["
 
 $definitions; separator="\n"$
 
-int test$ctx.lastStructure.name$()
+int test$ctx.lastStructure.cScopedname$()
 {
-    $ctx.lastStructure.name$ $ctx.lastStructure.name$_serialization_topic = {0};
-    $ctx.lastStructure.name$ $ctx.lastStructure.name$_deserialization_topic = {0};
+    $ctx.lastStructure.cScopedname$ $ctx.lastStructure.cScopedname$_serialization_topic = {0};
+    $ctx.lastStructure.cScopedname$ $ctx.lastStructure.cScopedname$_deserialization_topic = {0};
 
-    initialize$ctx.lastStructure.name$(&$ctx.lastStructure.name$_serialization_topic);
+    initialize_$ctx.lastStructure.cScopedname$(&$ctx.lastStructure.cScopedname$_serialization_topic);
 
     uint8_t buffer[BUFFER_SIZE];
     ucdrBuffer mb;
 
     ucdr_init_buffer(&mb, buffer, BUFFER_SIZE);
-    $ctx.lastStructure.name$_serialize_topic(&mb, &$ctx.lastStructure.name$_serialization_topic);
+    $ctx.lastStructure.cScopedname$_serialize_topic(&mb, &$ctx.lastStructure.cScopedname$_serialization_topic);
 
     ucdr_reset_buffer(&mb);
-    $ctx.lastStructure.name$_deserialize_topic(&mb, &$ctx.lastStructure.name$_deserialization_topic);
+    $ctx.lastStructure.cScopedname$_deserialize_topic(&mb, &$ctx.lastStructure.cScopedname$_deserialization_topic);
 
-    uint32_t $ctx.lastStructure.name$_serialization_topic_size = $ctx.lastStructure.name$_size_of_topic(&$ctx.lastStructure.name$_serialization_topic, 0);
-    uint32_t $ctx.lastStructure.name$_deserialization_topic_size = $ctx.lastStructure.name$_size_of_topic(&$ctx.lastStructure.name$_deserialization_topic, 0);
+    uint32_t $ctx.lastStructure.cScopedname$_serialization_topic_size = $ctx.lastStructure.cScopedname$_size_of_topic(&$ctx.lastStructure.cScopedname$_serialization_topic, 0);
+    uint32_t $ctx.lastStructure.cScopedname$_deserialization_topic_size = $ctx.lastStructure.cScopedname$_size_of_topic(&$ctx.lastStructure.cScopedname$_deserialization_topic, 0);
     uint32_t buffer_length = ucdr_buffer_length(&mb);
 
-    int topic_equal = 0 == memcmp(&$ctx.lastStructure.name$_serialization_topic, &$ctx.lastStructure.name$_deserialization_topic, sizeof($ctx.lastStructure.name$));
-    int size_equal = $ctx.lastStructure.name$_serialization_topic_size == $ctx.lastStructure.name$_deserialization_topic_size;
-    size_equal = size_equal && $ctx.lastStructure.name$_serialization_topic_size == buffer_length;
+    int topic_equal = 0 == memcmp(&$ctx.lastStructure.cScopedname$_serialization_topic, &$ctx.lastStructure.cScopedname$_deserialization_topic, sizeof($ctx.lastStructure.cScopedname$));
+    int size_equal = $ctx.lastStructure.cScopedname$_serialization_topic_size == $ctx.lastStructure.cScopedname$_deserialization_topic_size;
+    size_equal = size_equal && $ctx.lastStructure.cScopedname$_serialization_topic_size == buffer_length;
 
     printf("\n");
     printf("===== Before serialize: =====\n");
-    print$ctx.lastStructure.name$(&$ctx.lastStructure.name$_serialization_topic);
+    print_$ctx.lastStructure.cScopedname$(&$ctx.lastStructure.cScopedname$_serialization_topic);
     printf("\n");
     printf("===== After deserialize: =====\n");
-    print$ctx.lastStructure.name$(&$ctx.lastStructure.name$_deserialization_topic);
+    print_$ctx.lastStructure.cScopedname$(&$ctx.lastStructure.cScopedname$_deserialization_topic);
     printf("\n");
     printf("ucdrBuffer: \n");
     printf("length: %d\n", buffer_length);
@@ -70,8 +70,8 @@ int test$ctx.lastStructure.name$()
     }
     printf("\n\n");
 
-    printf("Topic $ctx.lastStructure.name$ size: %s => pre: %d, post: %d, buffer: %d\n", size_equal ? "OK" : "ERROR", $ctx.lastStructure.name$_serialization_topic_size, $ctx.lastStructure.name$_deserialization_topic_size, buffer_length);
-    printf("Topic $ctx.lastStructure.name$ comparation: %s\n", topic_equal ? "OK" : "ERROR");
+    printf("Topic $ctx.lastStructure.cScopedname$ size: %s => pre: %d, post: %d, buffer: %d\n", size_equal ? "OK" : "ERROR", $ctx.lastStructure.cScopedname$_serialization_topic_size, $ctx.lastStructure.cScopedname$_deserialization_topic_size, buffer_length);
+    printf("Topic $ctx.lastStructure.cScopedname$ comparation: %s\n", topic_equal ? "OK" : "ERROR");
 
     return topic_equal && size_equal;
 }
@@ -79,20 +79,20 @@ int test$ctx.lastStructure.name$()
 int main(void)
 {
     srand((unsigned) time(NULL));
-    return test$ctx.lastStructure.name$() ? 0 : 1;
+    return test$ctx.lastStructure.cScopedname$() ? 0 : 1;
 }
 
 >>
 
 struct_type(ctx, parent, struct) ::= <<
-void print$struct.name$($struct.name$* topic)
+void print_$struct.cScopedname$($struct.cScopedname$* topic)
 {
-    printf("$struct.name$: { \n");
+    printf("$struct.cScopedname$: { \n");
     $struct.members:{$member_print(typecode=it.typecode, name=it.name, name=it.name)$}; separator="\n"$
     printf("}\n");
 }
 
-void initialize$struct.name$($struct.name$* topic)
+void initialize_$struct.cScopedname$($struct.cScopedname$* topic)
 {
     $struct.members:{$member_assignment(typecode=it.typecode, name=it.name, name=it.name)$}; separator="\n"$
 }
@@ -118,7 +118,7 @@ $sequence_assigment(typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$
 $array_assigment(typecode=typecode, name=name, originName=originName, dimensions=typecode.dimensions)$
 $else$
-initialize$typecode.cTypename$(&topic->$name$);
+initialize_$typecode.cTypename$(&topic->$name$);
 $endif$
 >>
 
@@ -168,7 +168,7 @@ $sequence_print(typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$
 $array_print(typecode=typecode, name=name, originName=originName, dimensions=typecode.dimensions)$
 $else$
-print$typecode.cTypename$(&topic->$name$);
+print_$typecode.cTypename$(&topic->$name$);
 $endif$
 >>
 
@@ -226,3 +226,16 @@ for(int i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 }
 printf("\n");
 >>
+
+
+module(ctx, parent, module, definition_list) ::= <<
+$definition_list$
+>>
+
+definition_list(definitions) ::= <<
+$definitions; separator="\n"$
+>>
+
+typedef_decl(ctx, parent, typedefs) ::= <<>>
+
+const_decl(ctx, parent, const) ::= <<>>

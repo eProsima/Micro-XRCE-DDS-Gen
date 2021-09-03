@@ -95,7 +95,11 @@ $if(member.typecode.isType_d)$
 $member.typecode.cTypename$ $member.name$[$member.typecode.maxsize$];
 $elseif(member.typecode.isType_e)$
 uint32_t $member.name$_size;
+$if(member.typecode.isType_10)$
+$member.typecode.contentTypeCode.cTypename$ $member.name$[0];
+$else$
 $member.typecode.contentTypeCode.cTypename$ $member.name$$member.typecode.cTypeDimensions$;
+$endif$
 $elseif(member.typecode.isType_f)$
 $member.typecode.cTypename$ $member.name$$member.typecode.cTypeDimensions$;
 $else$

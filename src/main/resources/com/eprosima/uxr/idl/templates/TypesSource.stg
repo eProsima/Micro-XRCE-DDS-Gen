@@ -91,12 +91,22 @@ $sequence_serialization(ctx=ctx, typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$
 $array_serialization(ctx=ctx, typecode=typecode, name=name, originName=originName, dimensions=typecode.dimensions)$
 $else$
-(void) $typecode.scopedname$_serialize_topic(writer, &topic->$name$);
+(void) $typecode.cScopedname$_serialize_topic(writer, &topic->$name$);
 $endif$
 >>
 
 sequence_serialization(ctx, typecode, name) ::= <<
-$if(typecode.contentTypeCode.primitive)$
+$if(typecode.isType_10)$
+$if(typecode.contentTypeCode.isStructType)$
+(void) ucdr_serialize_uint32_t(writer, topic->$name$_size);
+for(int i = 0; i < topic->$name$_size; ++i)
+{
+    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
+}
+$else$
+(void) ucdr_serialize_sequence_$typecode.contentTypeCode.cTypename$(writer, topic->$name$, topic->$name$_size);
+$endif$
+$elseif(typecode.contentTypeCode.primitive)$
 (void) ucdr_serialize_sequence_$typecode.cTypename$(writer, topic->$name$, topic->$name$_size);
 $else$
 (void) ucdr_serialize_uint32_t(writer, topic->$name$_size);
@@ -141,12 +151,29 @@ $sequence_deserialization(ctx=ctx, typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$
 $array_deserialization(ctx=ctx, typecode=typecode, name=name, originName=originName, dimensions=typecode.dimensions)$
 $else$
-(void) $typecode.scopedname$_deserialize_topic(reader, &topic->$name$);
+(void) $typecode.cScopedname$_deserialize_topic(reader, &topic->$name$);
 $endif$
 >>
 
 sequence_deserialization(ctx, typecode, name) ::= <<
-$if(typecode.contentTypeCode.primitive)$
+$if(typecode.isType_10)$
+$if(typecode.contentTypeCode.isStructType)$
+(void) ucdr_deserialize_uint32_t(reader, &topic->$name$_size);
+if(topic->$name$_size > $typecode.maxsize$)
+{
+    reader->error = true;
+}
+else
+{
+    for(int i = 0; i < topic->$name$_size; ++i)
+    {
+        $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
+    }
+}
+$else$
+(void) ucdr_deserialize_sequence_$typecode.contentTypeCode.cTypename$(reader, topic->$name$, $typecode.maxsize$, &topic->$name$_size);
+$endif$
+$elseif(typecode.contentTypeCode.primitive)$
 (void) ucdr_deserialize_sequence_$typecode.cTypename$(reader, topic->$name$, $typecode.maxsize$, &topic->$name$_size);
 $else$
 (void) ucdr_deserialize_uint32_t(reader, &topic->$name$_size);
@@ -198,7 +225,7 @@ $sequence_size(ctx=ctx, typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$
 $array_size(ctx=ctx, typecode=typecode, name=name, originName=originName, dimensions=typecode.dimensions)$
 $else$
-size += $typecode.scopedname$_size_of_topic(&topic->$name$, size);
+size += $typecode.cScopedname$_size_of_topic(&topic->$name$, size);
 $endif$
 >>
 

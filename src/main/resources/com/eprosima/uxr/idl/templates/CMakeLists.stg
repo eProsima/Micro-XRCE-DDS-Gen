@@ -82,3 +82,12 @@ target_compile_options($project.name$SerializationTest
 
 $endif$
 >>
+
+module(ctx, parent, module, definition_list) ::= <<>>
+
+definition_list(definitions) ::= <<>>
+
+typedef_decl(ctx, parent, typedefs) ::= <<>>
+
+const_decl(ctx, parent, const) ::= <<>>
+
