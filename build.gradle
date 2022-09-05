@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // internal plugins
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'eclipse' // Eclipse integration
 
 version = '1.0.0beta2'
@@ -23,13 +23,13 @@ repositories {
 }
 
 dependencies {
-    compile files('thirdparty/IDL-Parser/build/libs/idlparser-1.0.0.jar')
-    testCompile group: 'junit', name: 'junit', version: '4.+'
+    implementation files('thirdparty/IDL-Parser/build/libs/idlparser-1.3.0.jar')
+    testImplementation group: 'junit', name: 'junit', version: '4.+'
 }
 
 task buildIDLParser(type: GradleBuild) {
-    buildFile = 'thirdparty/IDL-Parser/idl.gradle'
-    tasks = ['clean', 'build']
+    dir = 'thirdparty/IDL-Parser'
+    tasks = ['build']
 }
 
 sourceSets {
@@ -49,19 +49,29 @@ sourceSets {
 }
 
 jar {
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    baseName = 'microxrceddsgen'
-    archiveName = "${jar.baseName}.${jar.extension}"
-    destinationDir = file(new File(projectDir, 'share/microxrcedds'))
+    duplicatesStrategy 'exclude'
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    archiveName = "microxrceddsgen.${jar.extension}"
     manifest {
-        attributes("Created-By": "eProsima", "Main-Class": "com.eprosima.uxr.microxrceddsgen", "Specification-Version": version)
+        attributes("Created-By": "eProsima", "Main-Class": "com.eprosima.uxr.microxrceddsgen", "Specification-Version": archiveVersion)
     }
+    doLast
+    {
+        copy {
+            from jar
+            into "share/microxrcedds"
+        }
+    }
+}
+
+processResources() {
+    duplicatesStrategy = 'EXCLUDE'
 }
 
 compileJava.dependsOn buildIDLParser
 compileJava {
-    sourceCompatibility = 1.6
-    targetCompatibility = 1.6
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 }
 
 test {

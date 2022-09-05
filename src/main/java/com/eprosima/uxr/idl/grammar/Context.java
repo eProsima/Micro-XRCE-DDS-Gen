@@ -20,7 +20,7 @@ import java.util.Stack;
 import com.eprosima.idl.parser.tree.Interface;
 import com.eprosima.idl.parser.tree.TypeDeclaration;
 import com.eprosima.idl.parser.tree.Annotation;
-import com.eprosima.idl.parser.typecode.TypeCode;
+import com.eprosima.idl.parser.typecode.Kind;
 import com.eprosima.uxr.idl.parser.typecode.StructTypeCode;
 
 public class Context extends com.eprosima.idl.context.Context implements com.eprosima.uxr.idl.context.Context
@@ -55,7 +55,7 @@ public class Context extends com.eprosima.idl.context.Context implements com.epr
     {
         super.addTypeDeclaration(typedecl);
 
-        if(typedecl.getTypeCode().getKind() == TypeCode.KIND_STRUCT && typedecl.isInScope())
+        if(typedecl.getTypeCode().getKind() == Kind.KIND_STRUCT && typedecl.isInScope())
         {
             Annotation topicann = typedecl.getAnnotations().get("Topic");
 
