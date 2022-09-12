@@ -59,7 +59,21 @@ public class MicroXRCEDDSGenIntegrationTest
         //Configure idl tests
         TestManager tests = new TestManager(TestLevel.RUN, "share/microxrcedds/microxrceddsgen", INPUT_PATH, OUTPUT_PATH + "/idls");
         tests.addCMakeArguments("-DCMAKE_PREFIX_PATH=" + System.getProperty("user.dir") + "/" + OUTPUT_PATH + "/Micro-XRCE-DDS-Client/build/install");
-        tests.removeTests(IDL.ARRAY_NESTED, IDL.SEQUENCE_NESTED);
+        tests.removeTests(
+            IDL.ARRAY_NESTED, 
+            IDL.SEQUENCE_NESTED,
+            IDL.SEQUENCE_BASIC,
+            IDL.SEQUENCE_STRING,
+            IDL.SEQUENCE_CUSTOM,
+            IDL.INCLUDE,
+            IDL.BITSET_BITMASK,
+            IDL.COVERAGE_BASIC,
+            IDL.COVERAGE_COMPLEX,
+            IDL.FORWARD_DECLS,
+            IDL.NEW_FEATURES_4_2
+        );
+
+        // Remove tests here
         boolean testResult = tests.runTests();
         System.exit(testResult ? 0 : -1);
     }
