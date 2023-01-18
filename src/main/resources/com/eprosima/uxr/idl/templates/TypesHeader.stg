@@ -86,7 +86,12 @@ uint32_t $struct.cScopedname$_size_of_topic(const $struct.cScopedname$* topic, u
 >>
 
 union_type(ctx, parent, union, extensions) ::= <<>>
-enum_type(ctx, parent, enum) ::= <<>>
+enum_type(ctx, parent, enum) ::= <<
+typedef enum $enum.name$
+{
+    $enum.members:{$it.name$}; separator=",\n"$
+} $enum.name$;
+>>
 
 /***** Utils *****/
 

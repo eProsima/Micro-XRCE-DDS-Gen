@@ -82,7 +82,9 @@ enum_type(ctx, parent, enum) ::= <<>>
 //                                     SERIALIZATION
 // ========================================================================================
 member_serialization(ctx, typecode, name, originName) ::= <<
-$if(typecode.primitive)$
+$if(typecode.isType_c)$
+(void) ucdr_serialize_uint32_t(writer, (uint32_t)topic->$name$);
+$elseif(typecode.primitive)$
 (void) ucdr_serialize_$typecode.cTypename$(writer, topic->$name$);
 $elseif(typecode.isType_d)$
 (void) ucdr_serialize_string(writer, topic->$name$);
@@ -132,7 +134,9 @@ $endif$
 //                                    DESERIALIZATION
 // ========================================================================================
 member_deserialization(ctx, typecode, name, originName) ::= <<
-$if(typecode.primitive)$
+$if(typecode.isType_c)$
+(void) ucdr_deserialize_uint32_t(reader, (uint32_t)&topic->$name$);
+$elseif(typecode.primitive)$
 (void) ucdr_deserialize_$typecode.cTypename$(reader, &topic->$name$);
 $elseif(typecode.isType_d)$
 (void) ucdr_deserialize_string(reader, topic->$name$, $typecode.maxsize$);
