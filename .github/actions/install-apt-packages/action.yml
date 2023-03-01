@@ -1,0 +1,12 @@
+name: 'install-apt-packages'
+description: 'Install necessary apt packages'
+runs:
+  using: "composite"
+  steps:
+    - id: install-apt-packages
+      run: |
+        sudo apt update
+        sudo apt -y install \
+          software-properties-common \
+          openjdk-11-jdk
+      shell: bash
