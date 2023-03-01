@@ -23,22 +23,20 @@ repositories {
 }
 
 dependencies {
-    implementation files('thirdparty/IDL-Parser/build/libs/idlparser-1.3.0.jar')
-    testImplementation group: 'junit', name: 'junit', version: '4.+'
+    implementation files('thirdparty/IDL-Parser/build/libs/idlparser-1.5.0.jar')
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.5.2')
+    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.5.2')
 }
 
 task buildIDLParser(type: GradleBuild) {
     dir = 'thirdparty/IDL-Parser'
-    tasks = ['build']
+    tasks = ['clean', 'build']
 }
 
 sourceSets {
     main {
         java {
             srcDir 'src/main/java'
-        }
-        resources {
-            srcDir 'src/main/resources'
         }
     }
     test {
@@ -51,9 +49,15 @@ sourceSets {
 jar {
     duplicatesStrategy 'exclude'
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    archiveName = "microxrceddsgen.${jar.extension}"
+    baseName = 'microxrceddsgen'
+    archiveName = "${jar.baseName}.${jar.extension}"
     manifest {
-        attributes("Created-By": "eProsima", "Main-Class": "com.eprosima.uxr.microxrceddsgen", "Specification-Version": archiveVersion)
+        attributes(
+                "Created-By": "eProsima",
+                "Main-Class": "com.eprosima.uxr.microxrceddsgen",
+                "Specification-Version": version,
+                "Class-Path": configurations.runtimeClasspath.collect { it.getName() }.join(' ')
+                )
     }
     doLast
     {
@@ -70,13 +74,12 @@ processResources() {
 
 compileJava.dependsOn buildIDLParser
 compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 11
+    targetCompatibility = 11
 }
 
 test {
-    systemProperty 'branch', System.getProperty('branch')
-    useJUnit()
+    useJUnitPlatform()
+    testLogging.showStandardStreams = true
+    systemProperties = System.getProperties()
 }
-
-
