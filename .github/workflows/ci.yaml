@@ -9,7 +9,7 @@ on:
 
   pull_request:
     branches:
-      - 'master'
+      - '**'
 
 jobs:
   ubuntu-build-test:
