@@ -31,15 +31,23 @@ $definitions; separator="\n"$
 
 >>
 
+module(ctx, parent, module, definition_list) ::= <<
+$definition_list$
+>>
+
+definition_list(definitions) ::= <<
+$definitions; separator="\n"$
+>>
+
 struct_type(ctx, parent, struct) ::= <<
-void print$struct.name$($struct.name$* topic)
+void print$struct.cScopedname$($struct.cScopedname$* topic)
 {
-    printf("$struct.name$: { \n");
+    printf("$struct.cScopedname$: { \n");
     $struct.members:{$member_print(typecode=it.typecode, name=it.name, name=it.name)$}; separator="\n"$
     printf("}\n");
 }
 
-void initialize$struct.name$($struct.name$* topic)
+void initialize$struct.cScopedname$($struct.cScopedname$* topic)
 {
     $struct.members:{$member_assignment(typecode=it.typecode, name=it.name, name=it.name)$}; separator="\n"$
 }
@@ -54,10 +62,6 @@ bitmask_type(ctx, parent, bitmask) ::= <<>>
 typedef_decl(ctx, parent, typedefs) ::= <<>>
 
 annotation(ctx, annotation) ::= <<>>
-
-module(ctx, parent, module, definition_list) ::= <<>>
-
-definition_list(definitions) ::= <<>>
 
 fwd_decl(ctx, parent, type) ::= <<>>
 
