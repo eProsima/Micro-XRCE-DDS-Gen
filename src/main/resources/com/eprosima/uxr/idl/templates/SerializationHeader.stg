@@ -27,10 +27,18 @@ $definitions; separator="\n"$
 #endif //_UXR_GENERATED_$ctx.headerGuardName$_SERIALIZATION_H_
 >>
 
-struct_type(ctx, parent, struct) ::= <<
-void print$struct.name$($struct.name$* topic);
+module(ctx, parent, module, definition_list) ::= <<
+$definition_list$
+>>
 
-void initialize$struct.name$($struct.name$* topic);
+definition_list(definitions) ::= <<
+$definitions; separator="\n"$
+>>
+
+struct_type(ctx, parent, struct) ::= <<
+void print$struct.cScopedname$($struct.cScopedname$* topic);
+
+void initialize$struct.cScopedname$($struct.cScopedname$* topic);
 >>
 
 union_type(ctx, parent, union) ::= <<>>
@@ -44,10 +52,6 @@ bitmask_type(ctx, parent, bitmask) ::= <<>>
 bitset_type(ctx, parent, bitset) ::= <<>>
 
 annotation(ctx, annotation) ::= <<>>
-
-module(ctx, parent, module, definition_list) ::= <<>>
-
-definition_list(definitions) ::= <<>>
 
 fwd_decl(ctx, parent, type) ::= <<>>
 
