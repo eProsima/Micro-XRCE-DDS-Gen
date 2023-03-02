@@ -295,7 +295,6 @@ public class microxrceddsgen {
             topicann.addMember(new AnnotationMember("value", new PrimitiveTypeCode(Kind.KIND_BOOLEAN), "true"));
 
             // Create template manager
-            boolean m_typesc = false;
             TemplateManager tmanager = new TemplateManager("Common", ctx, false);
 
             // Load common types template
@@ -310,6 +309,8 @@ public class microxrceddsgen {
 
             // Load test template
             tmanager.addGroup("SerializationTestSource");
+            tmanager.addGroup("SerializationSource");
+            tmanager.addGroup("SerializationHeader");
 
             // Create main template
             TemplateGroup maintemplates = tmanager.createTemplateGroup("main");
@@ -353,6 +354,14 @@ public class microxrceddsgen {
                     System.out.println("Generating Serialization Test file...");
                     fileName = m_outputDir + idlFileNameOnly + "SerializationTest.c";
                     returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationTestSource"), m_replace);
+                    project.addCommonSrcFile(fileName);
+
+                    fileName = m_outputDir + idlFileNameOnly + "Serialization.c";
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationSource"), m_replace);
+                    project.addCommonSrcFile(fileName);
+
+                    fileName = m_outputDir + idlFileNameOnly + "Serialization.h";
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationHeader"), m_replace);
                     project.addCommonSrcFile(fileName);
                 }
 
