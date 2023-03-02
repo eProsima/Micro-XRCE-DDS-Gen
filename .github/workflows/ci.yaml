@@ -38,4 +38,4 @@ jobs:
       - name: Test microxrceddsgen
         run: |
           cd src/microxrceddsgen
-          ./gradlew test -Dbranch=v1.2.5
+          ./gradlew test -Dbranch=v2.3.0
