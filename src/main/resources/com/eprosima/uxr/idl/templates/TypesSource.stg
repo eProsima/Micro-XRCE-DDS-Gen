@@ -97,7 +97,7 @@ $sequence_serialization(ctx=ctx, typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$
 $array_serialization(ctx=ctx, typecode=typecode, name=name, originName=originName, dimensions=typecode.dimensions)$
 $else$
-success &= $typecode.scopedname$_serialize_topic(writer, &topic->$name$);
+success &= $typecode.cScopedname$_serialize_topic(writer, &topic->$name$);
 $endif$
 >>
 
@@ -149,7 +149,7 @@ $sequence_deserialization(ctx=ctx, typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$
 $array_deserialization(ctx=ctx, typecode=typecode, name=name, originName=originName, dimensions=typecode.dimensions)$
 $else$
-success &= $typecode.scopedname$_deserialize_topic(reader, &topic->$name$);
+success &= $typecode.cScopedname$_deserialize_topic(reader, &topic->$name$);
 $endif$
 >>
 
@@ -206,7 +206,7 @@ $sequence_size(ctx=ctx, typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$
 $array_size(ctx=ctx, typecode=typecode, name=name, originName=originName, dimensions=typecode.dimensions)$
 $else$
-size += $typecode.scopedname$_size_of_topic(&topic->$name$, size);
+size += $typecode.cScopedname$_size_of_topic(&topic->$name$, size);
 $endif$
 >>
 
