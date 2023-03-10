@@ -45,3 +45,6 @@ gradle-app.setting
 # Eclipse
 .classpath
 .project
+
+# VSC
+.devcontainer
