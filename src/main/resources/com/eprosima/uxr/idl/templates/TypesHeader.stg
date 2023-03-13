@@ -60,7 +60,12 @@ param(parameter) ::= <<>>
 const_decl(ctx, parent, const) ::= <<>>
 
 typedef_decl(ctx, parent, typedefs) ::= <<
-$typedefs : { typedef |typedef $typedef.typedefContentTypeCode.cTypename$ $typedef.name$;}; separator="\n"$
+$typedefs :
+{ typedef |
+$if(!typedef.isType_10)$
+typedef $typedef.typedefContentTypeCode.cTypename$ $typedef.name$
+$endif$
+}; separator="\n"$
 >>
 
 struct_type(ctx, parent, struct, extensions) ::= <<
@@ -101,6 +106,8 @@ $member.typecode.cTypename$ $member.name$[$member.typecode.maxsize$];
 $elseif(member.typecode.isType_e)$
 uint32_t $member.name$_size;
 $member.typecode.contentTypeCode.cTypename$ $member.name$$member.typecode.cTypeDimensions$;
+$elseif(member.typecode.isType_10)$
+$member.typecode.TypedefContentTypeCode$ $member.name$;
 $elseif(member.typecode.isType_f)$
 $member.typecode.cTypename$ $member.name$$member.typecode.cTypeDimensions$;
 $else$
