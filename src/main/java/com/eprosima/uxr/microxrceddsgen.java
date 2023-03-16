@@ -117,7 +117,18 @@ public class microxrceddsgen {
                 printHelp();
                 System.exit(0);
             }
-            else { // TODO: More options: -local, -rpm, -debug -I
+            else if (arg.equals("-I"))
+            {
+                if (count < args.length)
+                {
+                    m_includePaths.add("-I".concat(args[count++]));
+                }
+                else
+                {
+                    throw new BadArgumentException("No include directory specified after -I argument");
+                }
+            }
+            else { // TODO: More options: -local, -rpm, -debug
                 throw new BadArgumentException("Unknown argument " + arg);
             }
 
