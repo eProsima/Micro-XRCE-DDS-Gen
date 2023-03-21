@@ -57,7 +57,13 @@ bool $struct.cScopedname$_serialize_topic(ucdrBuffer* writer, const $struct.cSco
 {
     bool success = true;
 
-    $struct.members : { member |$member_serialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$}; separator="\n"$
+    $struct.members :
+    { member |
+    $if(member.typecode.isType_10)$
+    $member_serialization(ctx=ctx, typecode=member.typecode.typedefContentTypeCode, name=member.name, originName=member.name)$
+    $else$
+    $member_serialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$
+    $endif$}; separator="\n"$
     return success && !writer->error;
 }
 
@@ -65,14 +71,26 @@ bool $struct.cScopedname$_deserialize_topic(ucdrBuffer* reader, $struct.cScopedn
 {
     bool success = true;
 
-    $struct.members : { member |$member_deserialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$}; separator="\n"$
+    $struct.members :
+    { member |
+    $if(member.typecode.isType_10)$
+    $member_deserialization(ctx=ctx, typecode=member.typecode.typedefContentTypeCode, name=member.name, originName=member.name)$
+    $else$
+    $member_deserialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$
+    $endif$}; separator="\n"$
     return success && !reader->error;
 }
 
 uint32_t $struct.cScopedname$_size_of_topic(const $struct.cScopedname$* topic, uint32_t size)
 {
     uint32_t previousSize = size;
-    $struct.members : { member|$member_size(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$};separator="\n"$
+    $struct.members :
+    { member |
+    $if(member.typecode.isType_10)$
+    $member_size(ctx=ctx, typecode=member.typecode.typedefContentTypeCode, name=member.name, originName=member.name)$
+    $else$
+    $member_size(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$
+    $endif$}; separator="\n"$
     return size - previousSize;
 }
 
