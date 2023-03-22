@@ -55,6 +55,7 @@ public class microxrceddsgen {
 
     private Vector<String> m_idlFiles;
     protected static String m_appEnv = "MICROXRCEDDSHOME";
+    private boolean m_case_sensitive = false;
     private boolean m_exampleOption = false;
     private boolean m_ppDisable = false; //TODO
     private boolean m_replace = false;
@@ -108,6 +109,8 @@ public class microxrceddsgen {
                 } else {
                     throw new BadArgumentException("No URL specified after -d argument");
                 }
+            } else if (arg.equals("-cs")) {
+                m_case_sensitive = true;
             } else if (arg.equals("-test")) {
                 m_test = true;
             } else if (arg.equals("-version")) {
@@ -228,6 +231,7 @@ public class microxrceddsgen {
         System.out.println("\t\t-ppPath: specifies the preprocessor path.");
         System.out.println("\t\t-d <path>: sets an output directory for generated files.");
         System.out.println("\t\t-t <temp dir>: sets a specific directory as a temporary directory.");
+        System.out.println("\t\t-cs: IDL grammar apply case sensitive matching.");
         System.out.println("\tand the supported input files are:");
         System.out.println("\t* IDL files.");
     }
@@ -285,6 +289,11 @@ public class microxrceddsgen {
 
         if (idlParseFileName != null) {
             Context ctx = new Context(idlFileNameOnly, idlFileName, m_includePaths, true, true);
+
+            if (m_case_sensitive)
+            {
+                ctx.ignore_case(false);
+            }
 
             // Create default @Key annotation.
             AnnotationDeclaration keyann = ctx.createAnnotationDeclaration("Key", null);
