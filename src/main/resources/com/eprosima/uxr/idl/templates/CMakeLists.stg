@@ -66,7 +66,10 @@ target_compile_options($project.name$Publisher
 
 $if(test)$
 # $project.name$ Serialization Test
-add_executable($project.name$SerializationTest $project.name$SerializationTest.c \${SRCS})
+add_executable($project.name$SerializationTest $project.name$SerializationTest.c
+        $project.name$Serialization.c
+        $project.dependencies : {$it$Serialization.c}; separator=" "$
+        \${SRCS})
 target_link_libraries($project.name$SerializationTest microxrcedds_client)
 set_target_properties($project.name$SerializationTest PROPERTIES
     C_STANDARD

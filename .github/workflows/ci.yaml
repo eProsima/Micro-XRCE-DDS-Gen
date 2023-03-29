@@ -1,0 +1,41 @@
+name: Continuous Integration
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - 'master'
+
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  ubuntu-build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: src/microxrceddsgen
+          submodules: recursive
+
+      - uses: ./src/microxrceddsgen/.github/actions/install-apt-packages
+
+      - name: Get minimum supported version of CMake
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.16.3
+      - name: Use cmake
+        run: cmake --version
+
+      - name: Build microxrceddsgen
+        run: |
+          cd src/microxrceddsgen
+          ./gradlew assemble
+
+      - name: Test microxrceddsgen
+        run: |
+          cd src/microxrceddsgen
+          ./gradlew test -Dbranch=v2.3.0

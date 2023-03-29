@@ -55,20 +55,42 @@ typedef_decl(ctx, parent, typedefs) ::= <<>>
 struct_type(ctx, parent, struct, extensions) ::= <<
 bool $struct.cScopedname$_serialize_topic(ucdrBuffer* writer, const $struct.cScopedname$* topic)
 {
-    $struct.members : { member |$member_serialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$}; separator="\n"$
-    return !writer->error;
+    bool success = true;
+
+    $struct.members :
+    { member |
+    $if(member.typecode.isType_10)$
+    $member_serialization(ctx=ctx, typecode=member.typecode.typedefContentTypeCode, name=member.name, originName=member.name)$
+    $else$
+    $member_serialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$
+    $endif$}; separator="\n"$
+    return success && !writer->error;
 }
 
 bool $struct.cScopedname$_deserialize_topic(ucdrBuffer* reader, $struct.cScopedname$* topic)
 {
-    $struct.members : { member |$member_deserialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$}; separator="\n"$
-    return !reader->error;
+    bool success = true;
+
+    $struct.members :
+    { member |
+    $if(member.typecode.isType_10)$
+    $member_deserialization(ctx=ctx, typecode=member.typecode.typedefContentTypeCode, name=member.name, originName=member.name)$
+    $else$
+    $member_deserialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$
+    $endif$}; separator="\n"$
+    return success && !reader->error;
 }
 
 uint32_t $struct.cScopedname$_size_of_topic(const $struct.cScopedname$* topic, uint32_t size)
 {
     uint32_t previousSize = size;
-    $struct.members : { member|$member_size(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$};separator="\n"$
+    $struct.members :
+    { member |
+    $if(member.typecode.isType_10)$
+    $member_size(ctx=ctx, typecode=member.typecode.typedefContentTypeCode, name=member.name, originName=member.name)$
+    $else$
+    $member_size(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$
+    $endif$}; separator="\n"$
     return size - previousSize;
 }
 
@@ -82,24 +104,26 @@ enum_type(ctx, parent, enum) ::= <<>>
 //                                     SERIALIZATION
 // ========================================================================================
 member_serialization(ctx, typecode, name, originName) ::= <<
-$if(typecode.primitive)$
-(void) ucdr_serialize_$typecode.cTypename$(writer, topic->$name$);
+$if(typecode.isType_c)$
+success &= ucdr_serialize_uint32_t(writer, (uint32_t)topic->$name$);
+$elseif(typecode.primitive)$
+success &= ucdr_serialize_$typecode.cTypename$(writer, topic->$name$);
 $elseif(typecode.isType_d)$
-(void) ucdr_serialize_string(writer, topic->$name$);
+success &= ucdr_serialize_string(writer, topic->$name$);
 $elseif(typecode.isType_e)$
 $sequence_serialization(ctx=ctx, typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$
 $array_serialization(ctx=ctx, typecode=typecode, name=name, originName=originName, dimensions=typecode.dimensions)$
 $else$
-(void) $typecode.scopedname$_serialize_topic(writer, &topic->$name$);
+success &= $typecode.cScopedname$_serialize_topic(writer, &topic->$name$);
 $endif$
 >>
 
 sequence_serialization(ctx, typecode, name) ::= <<
 $if(typecode.contentTypeCode.primitive)$
-(void) ucdr_serialize_sequence_$typecode.cTypename$(writer, topic->$name$, topic->$name$_size);
+success &= ucdr_serialize_sequence_$typecode.cTypename$(writer, topic->$name$, topic->$name$_size);
 $else$
-(void) ucdr_serialize_uint32_t(writer, topic->$name$_size);
+success &= ucdr_serialize_uint32_t(writer, topic->$name$_size);
 for(int i = 0; i < topic->$name$_size; ++i)
 {
     $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
@@ -114,7 +138,7 @@ for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$)
     $array_serialization(ctx=ctx, typecode=typecode, name=indexName(name=name, suffix=length(dimensions)), originName=originName, dimensions=rest(dimensions))$
 }
 $elseif(typecode.contentTypeCode.primitive)$
-(void) ucdr_serialize_array_$typecode.cTypename$(writer, topic->$name$, sizeof(topic->$name$) / sizeof($typecode.cTypename$));
+success &= ucdr_serialize_array_$typecode.cTypename$(writer, topic->$name$, sizeof(topic->$name$) / sizeof($typecode.cTypename$));
 $elseif(typecode.contentTypeCode.isType_d)$
 for(int i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
 {
@@ -132,24 +156,26 @@ $endif$
 //                                    DESERIALIZATION
 // ========================================================================================
 member_deserialization(ctx, typecode, name, originName) ::= <<
-$if(typecode.primitive)$
-(void) ucdr_deserialize_$typecode.cTypename$(reader, &topic->$name$);
+$if(typecode.isType_c)$
+success &= ucdr_deserialize_uint32_t(reader, (uint32_t)&topic->$name$);
+$elseif(typecode.primitive)$
+success &= ucdr_deserialize_$typecode.cTypename$(reader, &topic->$name$);
 $elseif(typecode.isType_d)$
-(void) ucdr_deserialize_string(reader, topic->$name$, $typecode.maxsize$);
+success &= ucdr_deserialize_string(reader, topic->$name$, $typecode.maxsize$);
 $elseif(typecode.isType_e)$
 $sequence_deserialization(ctx=ctx, typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$
 $array_deserialization(ctx=ctx, typecode=typecode, name=name, originName=originName, dimensions=typecode.dimensions)$
 $else$
-(void) $typecode.scopedname$_deserialize_topic(reader, &topic->$name$);
+success &= $typecode.cScopedname$_deserialize_topic(reader, &topic->$name$);
 $endif$
 >>
 
 sequence_deserialization(ctx, typecode, name) ::= <<
 $if(typecode.contentTypeCode.primitive)$
-(void) ucdr_deserialize_sequence_$typecode.cTypename$(reader, topic->$name$, $typecode.maxsize$, &topic->$name$_size);
+success &= ucdr_deserialize_sequence_$typecode.cTypename$(reader, topic->$name$, $typecode.maxsize$, &topic->$name$_size);
 $else$
-(void) ucdr_deserialize_uint32_t(reader, &topic->$name$_size);
+success &= ucdr_deserialize_uint32_t(reader, &topic->$name$_size);
 if(topic->$name$_size > $typecode.maxsize$)
 {
     reader->error = true;
@@ -171,7 +197,7 @@ for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$)
     $array_deserialization(ctx=ctx, typecode=typecode, name=indexName(name=name, suffix=length(dimensions)), originName=originName, dimensions=rest(dimensions))$
 }
 $elseif(typecode.contentTypeCode.primitive)$
-(void) ucdr_deserialize_array_$typecode.cTypename$(reader, topic->$name$, sizeof(topic->$name$) / sizeof($typecode.cTypename$));
+success &= ucdr_deserialize_array_$typecode.cTypename$(reader, topic->$name$, sizeof(topic->$name$) / sizeof($typecode.cTypename$));
 $elseif(typecode.contentTypeCode.isType_d)$
 for(int i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
 {
@@ -198,7 +224,7 @@ $sequence_size(ctx=ctx, typecode=typecode, name=name)$
 $elseif(typecode.isType_f)$
 $array_size(ctx=ctx, typecode=typecode, name=name, originName=originName, dimensions=typecode.dimensions)$
 $else$
-size += $typecode.scopedname$_size_of_topic(&topic->$name$, size);
+size += $typecode.cScopedname$_size_of_topic(&topic->$name$, size);
 $endif$
 >>
 

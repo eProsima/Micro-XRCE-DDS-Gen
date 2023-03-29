@@ -47,7 +47,7 @@ import com.eprosima.idl.parser.tree.Specification;
 import com.eprosima.idl.parser.tree.AnnotationDeclaration;
 import com.eprosima.idl.parser.tree.AnnotationMember;
 import com.eprosima.idl.parser.typecode.PrimitiveTypeCode;
-import com.eprosima.idl.parser.typecode.TypeCode;
+import com.eprosima.idl.parser.typecode.Kind;
 import com.eprosima.idl.util.Util;
 import com.eprosima.log.ColorMessage;
 
@@ -55,6 +55,7 @@ public class microxrceddsgen {
 
     private Vector<String> m_idlFiles;
     protected static String m_appEnv = "MICROXRCEDDSHOME";
+    private boolean m_case_sensitive = false;
     private boolean m_exampleOption = false;
     private boolean m_ppDisable = false; //TODO
     private boolean m_replace = false;
@@ -108,6 +109,8 @@ public class microxrceddsgen {
                 } else {
                     throw new BadArgumentException("No URL specified after -d argument");
                 }
+            } else if (arg.equals("-cs")) {
+                m_case_sensitive = true;
             } else if (arg.equals("-test")) {
                 m_test = true;
             } else if (arg.equals("-version")) {
@@ -117,7 +120,18 @@ public class microxrceddsgen {
                 printHelp();
                 System.exit(0);
             }
-            else { // TODO: More options: -local, -rpm, -debug -I
+            else if (arg.equals("-I"))
+            {
+                if (count < args.length)
+                {
+                    m_includePaths.add("-I".concat(args[count++]));
+                }
+                else
+                {
+                    throw new BadArgumentException("No include directory specified after -I argument");
+                }
+            }
+            else { // TODO: More options: -local, -rpm, -debug
                 throw new BadArgumentException("Unknown argument " + arg);
             }
 
@@ -226,8 +240,10 @@ public class microxrceddsgen {
         System.out.println("\t\t-replace: replaces existing generated files.");
         System.out.println("\t\t-ppDisable: disables the preprocessor.");
         System.out.println("\t\t-ppPath: specifies the preprocessor path.");
+        System.out.println("\t\t-I <path>: add directory to preprocessor include paths.");
         System.out.println("\t\t-d <path>: sets an output directory for generated files.");
         System.out.println("\t\t-t <temp dir>: sets a specific directory as a temporary directory.");
+        System.out.println("\t\t-cs: IDL grammar apply case sensitive matching.");
         System.out.println("\tand the supported input files are:");
         System.out.println("\t* IDL files.");
     }
@@ -286,16 +302,21 @@ public class microxrceddsgen {
         if (idlParseFileName != null) {
             Context ctx = new Context(idlFileNameOnly, idlFileName, m_includePaths, true, true);
 
+            if (m_case_sensitive)
+            {
+                ctx.ignore_case(false);
+            }
+
             // Create default @Key annotation.
             AnnotationDeclaration keyann = ctx.createAnnotationDeclaration("Key", null);
-            keyann.addMember(new AnnotationMember("value", new PrimitiveTypeCode(TypeCode.KIND_BOOLEAN), "true"));
+            keyann.addMember(new AnnotationMember("value", new PrimitiveTypeCode(Kind.KIND_BOOLEAN), "true"));
 
             // Create default @Topic annotation.
             AnnotationDeclaration topicann = ctx.createAnnotationDeclaration("Topic", null);
-            topicann.addMember(new AnnotationMember("value", new PrimitiveTypeCode(TypeCode.KIND_BOOLEAN), "true"));
+            topicann.addMember(new AnnotationMember("value", new PrimitiveTypeCode(Kind.KIND_BOOLEAN), "true"));
 
             // Create template manager
-            TemplateManager tmanager = new TemplateManager("Common");
+            TemplateManager tmanager = new TemplateManager("Common", ctx, false);
 
             // Load common types template
             tmanager.addGroup("TypesHeader");
@@ -309,6 +330,8 @@ public class microxrceddsgen {
 
             // Load test template
             tmanager.addGroup("SerializationTestSource");
+            tmanager.addGroup("SerializationSource");
+            tmanager.addGroup("SerializationHeader");
 
             // Create main template
             TemplateGroup maintemplates = tmanager.createTemplateGroup("main");
@@ -352,6 +375,14 @@ public class microxrceddsgen {
                     System.out.println("Generating Serialization Test file...");
                     fileName = m_outputDir + idlFileNameOnly + "SerializationTest.c";
                     returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationTestSource"), m_replace);
+                    project.addCommonSrcFile(fileName);
+
+                    fileName = m_outputDir + idlFileNameOnly + "Serialization.c";
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationSource"), m_replace);
+                    project.addCommonSrcFile(fileName);
+
+                    fileName = m_outputDir + idlFileNameOnly + "Serialization.h";
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationHeader"), m_replace);
                     project.addCommonSrcFile(fileName);
                 }
 

@@ -60,7 +60,12 @@ param(parameter) ::= <<>>
 const_decl(ctx, parent, const) ::= <<>>
 
 typedef_decl(ctx, parent, typedefs) ::= <<
-$typedefs : { typedef |typedef $typedef.typedefContentTypeCode.cTypename$ $typedef.name$;}; separator="\n"$
+$typedefs :
+{ typedef |
+$if(!typedef.isType_10)$
+typedef $typedef.typedefContentTypeCode.cTypename$ $typedef.name$
+$endif$
+}; separator="\n"$
 >>
 
 struct_type(ctx, parent, struct, extensions) ::= <<
@@ -86,7 +91,12 @@ uint32_t $struct.cScopedname$_size_of_topic(const $struct.cScopedname$* topic, u
 >>
 
 union_type(ctx, parent, union, extensions) ::= <<>>
-enum_type(ctx, parent, enum) ::= <<>>
+enum_type(ctx, parent, enum) ::= <<
+typedef enum $enum.name$
+{
+    $enum.members:{$it.name$}; separator=",\n"$
+} $enum.name$;
+>>
 
 /***** Utils *****/
 
@@ -96,6 +106,17 @@ $member.typecode.cTypename$ $member.name$[$member.typecode.maxsize$];
 $elseif(member.typecode.isType_e)$
 uint32_t $member.name$_size;
 $member.typecode.contentTypeCode.cTypename$ $member.name$$member.typecode.cTypeDimensions$;
+$elseif(member.typecode.isType_10)$
+$if(member.typecode.typedefContentTypeCode.isType_d)$
+$member.typecode.typedefContentTypeCode.cTypename$ $member.name$[$member.typecode.typedefContentTypeCode.maxsize$];
+$elseif(member.typecode.typedefContentTypeCode.isType_e)$
+uint32_t $member.name$_size;
+$member.typecode.typedefContentTypeCode.cTypename$ $member.name$$member.typecode.typedefContentTypeCode.cTypeDimensions$;
+$elseif(member.typecode.typedefContentTypeCode.isType_f)$
+$member.typecode.typedefContentTypeCode.cTypename$ $member.name$$member.typecode.typedefContentTypeCode.cTypeDimensions$;
+$else$
+$member.typecode.contentTypeCode.cTypename$ $member.name$;
+$endif$
 $elseif(member.typecode.isType_f)$
 $member.typecode.cTypename$ $member.name$$member.typecode.cTypeDimensions$;
 $else$
