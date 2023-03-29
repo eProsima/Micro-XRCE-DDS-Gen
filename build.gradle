@@ -15,7 +15,7 @@
 apply plugin: 'java-library'
 apply plugin: 'eclipse' // Eclipse integration
 
-version = '1.0.0beta2'
+version = '2.0.0'
 description = 'Build script with all necessary tasks to compile and test MicroXRCEDDSGen'
 
 repositories {
