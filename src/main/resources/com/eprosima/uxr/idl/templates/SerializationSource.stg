@@ -93,7 +93,7 @@ topic->$name$_size = $typecode.maxsize$ / 2;
 $if(typecode.contentTypeCode.primitive)$
 memset(topic->$name$, rand(), topic->$name$_size * $typecode.contentTypeCode.size$);
 $else$
-for(int i = 0; i < topic->$name$_size; ++i)
+for(size_t i = 0; i < topic->$name$_size; ++i)
 {
     $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
 }
@@ -109,12 +109,12 @@ for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$)
 $elseif(typecode.contentTypeCode.primitive)$
 memset(topic->$name$, rand(), sizeof(topic->$name$));
 $elseif(typecode.contentTypeCode.isType_d)$
-for(int i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
+for(size_t i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
 {
     $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
 }
 $else$
-for(int i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
+for(size_t i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 {
     $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
 }
@@ -145,7 +145,7 @@ printf("$name$: ");
 $print_sequence(name)$
 $else$
 printf("$name$: \n");
-for(int i = 0; i < topic->$name$_size; ++i)
+for(size_t i = 0; i < topic->$name$_size; ++i)
 {
     $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
 }
@@ -164,13 +164,13 @@ printf("$name$: ");
 $print_array(typecode=typecode, name=name)$
 $elseif(typecode.contentTypeCode.isType_d)$
 printf("$name$: \n");
-for(int i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
+for(size_t i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
 {
     $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
 }
 $else$
 printf("$name$: \n");
-for(int i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
+for(size_t i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 {
     $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
 }
@@ -178,7 +178,7 @@ $endif$
 >>
 
 print_sequence(name) ::= <<
-for(int i = 0; i < topic->$name$_size; ++i)
+for(size_t i = 0; i < topic->$name$_size; ++i)
 {
     printf("%" PRIx64 " ", (uint64_t)topic->$name$[i]);
 }
@@ -186,7 +186,7 @@ printf("\n");
 >>
 
 print_array(typecode, name) ::= <<
-for(int i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
+for(size_t i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 {
     printf("%" PRIx64 " ", (uint64_t)topic->$name$[i]);
 }
