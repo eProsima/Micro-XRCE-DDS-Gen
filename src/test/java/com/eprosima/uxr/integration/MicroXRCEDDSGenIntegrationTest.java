@@ -66,6 +66,7 @@ public class MicroXRCEDDSGenIntegrationTest
                 IDL.COVERAGE_COMPLEX,
                 IDL.FORWARD_DECLS,
                 IDL.NEW_FEATURES_4_2,
+                IDL.ARRAY_MULTI_DIM,
                 IDL.SEQUENCE_BASIC_IN_MODULE_TYPEDEF,
                 IDL.SEQUENCE_CUSTOM_IN_MODULE_TYPEDEF,
                 IDL.SEQUENCE_STRING_IN_MODULE_TYPEDEF,
