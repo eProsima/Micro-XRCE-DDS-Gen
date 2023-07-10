@@ -27,7 +27,7 @@ public class Context extends com.eprosima.idl.context.Context implements com.epr
 {
     public Context(String filename, String file, ArrayList<String> includePaths, boolean subscribercode, boolean publishercode)
     {
-        super(filename, file, includePaths);
+        super(file, includePaths);
         m_fileNameUpper = filename.toUpperCase();
         m_subscribercode = subscribercode;
         m_publishercode = publishercode;

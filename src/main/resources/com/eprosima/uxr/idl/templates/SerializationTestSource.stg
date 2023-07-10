@@ -65,7 +65,7 @@ int test$ctx.lastStructure.cScopedname$()
     printf("ucdrBuffer: \n");
     printf("length: %d\n", buffer_length);
     printf("data: ");
-    for(int i = 0; i < buffer_length; ++i)
+    for(size_t i = 0; i < buffer_length; ++i)
     {
         printf("%02X ", mb.init[i]);
     }
