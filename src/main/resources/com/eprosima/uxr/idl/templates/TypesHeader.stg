@@ -96,6 +96,8 @@ typedef enum $enum.name$
 {
     $enum.members:{$it.name$}; separator=",\n"$
 } $enum.name$;
+
+typedef uint32_t $enum.name$_cdr;
 >>
 
 /***** Utils *****/
@@ -119,6 +121,8 @@ $member.typecode.contentTypeCode.cTypename$ $member.name$;
 $endif$
 $elseif(member.typecode.isType_f)$
 $member.typecode.cTypename$ $member.name$$member.typecode.cTypeDimensions$;
+$elseif(member.typecode.isType_c)$
+$member.typecode.cTypename$_cdr $member.name$;
 $else$
 $member.typecode.cTypename$ $member.name$;
 $endif$
