@@ -169,7 +169,7 @@ memset(topic->$name$, rand(), topic->$name$_size * $typecode.contentTypeCode.siz
 $else$
 for(size_t i = 0; i < topic->$name$_size; ++i)
 {
-    $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
+    $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=name)$
 }
 $endif$
 >>
@@ -185,12 +185,12 @@ memset(topic->$name$, rand(), sizeof(topic->$name$));
 $elseif(typecode.contentTypeCode.isType_d)$
 for(size_t i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
 {
-    $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
+    $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=name)$
 }
 $else$
 for(size_t i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 {
-    $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
+    $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=name)$
 }
 $endif$
 >>
@@ -221,7 +221,7 @@ $else$
 printf("$name$: \n");
 for(size_t i = 0; i < topic->$name$_size; ++i)
 {
-    $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
+    $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=name)$
 }
 $endif$
 >>
@@ -240,13 +240,13 @@ $elseif(typecode.contentTypeCode.isType_d)$
 printf("$name$: \n");
 for(size_t i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
 {
-    $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
+    $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=name)$
 }
 $else$
 printf("$name$: \n");
 for(size_t i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 {
-    $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
+    $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=name)$
 }
 $endif$
 >>
