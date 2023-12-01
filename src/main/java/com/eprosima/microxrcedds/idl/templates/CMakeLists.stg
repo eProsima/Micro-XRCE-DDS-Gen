@@ -27,10 +27,10 @@ find_package(microcdr REQUIRED)
 find_package(microxrcedds_client REQUIRED)
 
 set(SRCS
-    $solution.projects : {$it.name$.c}; separator="\n"$
+    $solution.projects : { project | $project.name$.c}; separator="\n"$
     )
 
-$solution.projects : {$execs(project=it, libraries=solution.libraries, examples=examples, test=test)$}; separator="\n"$
+$solution.projects : {it | $execs(project=it, libraries=solution.libraries, examples=examples, test=test)$}; separator="\n"$
 >>
 
 execs(project, libraries, examples, test) ::= <<
@@ -65,10 +65,13 @@ target_compile_options($project.name$Publisher
     )
 
 $if(test)$
+
+include(CTest)
+
 # $project.name$ Serialization Test
 add_executable($project.name$SerializationTest $project.name$SerializationTest.c
         $project.name$Serialization.c
-        $project.dependencies : {$it$Serialization.c}; separator=" "$
+        $project.dependencies : {it | $it$Serialization.c}; separator=" "$
         \${SRCS})
 target_link_libraries($project.name$SerializationTest microxrcedds_client)
 set_target_properties($project.name$SerializationTest PROPERTIES
@@ -82,6 +85,8 @@ target_compile_options($project.name$SerializationTest
         \$<\$<C_COMPILER_ID:MSVC>:/W4 /wd4700 /wd4996 /wd4820 /wd4255 /wd4668>
         \$<\$<C_COMPILER_ID:GNU>:-pedantic -fstrict-aliasing -Wall -Wcast-align -Wshadow>
     )
+
+add_test(NAME $project.name$SerializationTest COMMAND $project.name$SerializationTest)
 
 $endif$
 >>

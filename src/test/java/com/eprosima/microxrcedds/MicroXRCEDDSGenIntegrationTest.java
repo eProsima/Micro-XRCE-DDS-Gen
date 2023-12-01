@@ -1,9 +1,9 @@
-package com.eprosima.microxrcedds.integration;
+package test.com.eprosima.microxrcedds;
 
 import org.junit.jupiter.api.Test;
 
 import com.eprosima.integration.Command;
-import com.eprosima.integration.IDL;
+
 import com.eprosima.integration.TestManager;
 import com.eprosima.integration.TestManager.TestLevel;
 
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class MicroXRCEDDSGenIntegrationTest
 {
-    private static final String INPUT_PATH = "thirdparty/IDL-Parser/test/idls";
+    private static final String INPUT_PATH = "test";
     private static final String OUTPUT_PATH = "build/test/integration";
 
     private static boolean isUnix()
@@ -56,22 +56,41 @@ public class MicroXRCEDDSGenIntegrationTest
             }
         }
 
+        String list_tests_str = System.getProperty("list_tests");
+        java.util.List<String> list_tests = null;
+
+        if (null != list_tests_str)
+        {
+            list_tests = java.util.Arrays.asList(list_tests_str.split(",", -1));
+        }
+
+        String blacklist_tests_str = System.getProperty("blacklist_tests");
+        java.util.List<String> blacklist_tests = null;
+
+        if (null != blacklist_tests_str)
+        {
+            blacklist_tests = java.util.Arrays.asList(blacklist_tests_str.split(",", -1));
+        }
+
+        String cdr_version = System.getProperty("cdr_version");
+        if (null == cdr_version)
+        {
+            cdr_version = "v1";
+        }
+
         //Configure idl tests
-        TestManager tests = new TestManager(TestLevel.RUN, "share/microxrcedds/microxrceddsgen", INPUT_PATH, OUTPUT_PATH + "/idls");
+        TestManager tests = new TestManager(
+                TestLevel.RUN,
+                "share/microxrceddsgen/java/microxrceddsgen",
+                INPUT_PATH,
+                OUTPUT_PATH + "/idls",
+                "CMake",
+                cdr_version,
+                list_tests,
+                blacklist_tests);
+
         tests.addCMakeArguments("-DCMAKE_PREFIX_PATH=" + System.getProperty("user.dir") + "/" + OUTPUT_PATH + "/Micro-XRCE-DDS-Client/build/install");
-        tests.removeTests(
-                IDL.ARRAY_NESTED,
-                IDL.BITSET_BITMASK,
-                IDL.COVERAGE_BASIC,
-                IDL.COVERAGE_COMPLEX,
-                IDL.FORWARD_DECLS,
-                IDL.NEW_FEATURES_4_2,
-                IDL.ARRAY_MULTI_DIM,
-                IDL.SEQUENCE_BASIC_IN_MODULE_TYPEDEF,
-                IDL.SEQUENCE_CUSTOM_IN_MODULE_TYPEDEF,
-                IDL.SEQUENCE_STRING_IN_MODULE_TYPEDEF,
-                IDL.SEQUENCE_NESTED
-                );
+
         boolean testResult = tests.runTests();
         System.exit(testResult ? 0 : -1);
     }

@@ -88,7 +88,22 @@ public class microxrceddsgen {
                 m_idlFiles.add(arg);
             }
             else if (arg.equals("-example")) {
-                m_exampleOption = true;
+                if (count < args.length)
+                {
+                    String example_option = args[count++];
+                    if (!example_option.equals("CMake"))
+                    {
+                        throw new BadArgumentException("Invalid example option specified after -example argument. Valid options are: CMake");
+                    }
+                    else
+                    {
+                        m_exampleOption = true;
+                    }
+                }
+                else
+                {
+                    throw new BadArgumentException("No example option specified after -example argument");
+                }
             }
             else if(arg.equals("-ppPath"))
             {
@@ -127,6 +142,21 @@ public class microxrceddsgen {
                 else
                 {
                     throw new BadArgumentException("No include directory specified after -I argument");
+                }
+            }
+            else if (arg.equals("-cdr"))
+            {
+                if (count < args.length)
+                {
+                    String cdr_version_str = args[count++];
+                    if (!cdr_version_str.equals("v1"))
+                    {
+                        throw new BadArgumentException("Invalid CDR version specified after -cdr argument");
+                    }
+                }
+                else
+                {
+                    throw new BadArgumentException("No CDR version specified after -cdr argument");
                 }
             }
             else { // TODO: More options: -local, -rpm, -debug
@@ -297,18 +327,18 @@ public class microxrceddsgen {
 
             // Load common types template
             tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/TypesHeader.stg");
-            // tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/TypesSource.stg");
+            tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/TypesSource.stg");
 
-            // // Load Publisher template
-            // tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/PublisherSource.stg");
+            // Load Publisher template
+            tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/PublisherSource.stg");
 
-            // // Load Subscriber template
-            // tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SubscriberSource.stg");
+            // Load Subscriber template
+            tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SubscriberSource.stg");
 
             // // Load test template
-            // tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SerializationTestSource.stg");
-            // tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SerializationSource.stg");
-            // tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SerializationHeader.stg");
+            tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SerializationTestSource.stg");
+            tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SerializationSource.stg");
+            tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SerializationHeader.stg");
 
             // Create main template
             TemplateGroup maintemplates = tmanager.createTemplateGroup("main");
@@ -340,26 +370,26 @@ public class microxrceddsgen {
                 System.out.println("Generating Type definition files...");
 
                 fileName = m_outputDir + idlFileNameOnly + ".h";
-                returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("TypesHeader"), m_replace);
+                returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("com/eprosima/microxrcedds/idl/templates/TypesHeader.stg"), m_replace);
                 project.addCommonIncludeFile(fileName);
 
                 fileName = m_outputDir + idlFileNameOnly + ".c";
-                returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("TypesSource"), m_replace);
+                returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("com/eprosima/microxrcedds/idl/templates/TypesSource.stg"), m_replace);
                 project.addCommonSrcFile(fileName);
 
                 if (m_test)
                 {
                     System.out.println("Generating Serialization Test file...");
                     fileName = m_outputDir + idlFileNameOnly + "SerializationTest.c";
-                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationTestSource"), m_replace);
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("com/eprosima/microxrcedds/idl/templates/SerializationTestSource.stg"), m_replace);
                     project.addCommonSrcFile(fileName);
 
                     fileName = m_outputDir + idlFileNameOnly + "Serialization.c";
-                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationSource"), m_replace);
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("com/eprosima/microxrcedds/idl/templates/SerializationSource.stg"), m_replace);
                     project.addCommonSrcFile(fileName);
 
                     fileName = m_outputDir + idlFileNameOnly + "Serialization.h";
-                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationHeader"), m_replace);
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("com/eprosima/microxrcedds/idl/templates/SerializationHeader.stg"), m_replace);
                     project.addCommonSrcFile(fileName);
                 }
 
@@ -368,11 +398,11 @@ public class microxrceddsgen {
                     System.out.println("Generating publisher and subcriber example files...");
 
                     fileName = m_outputDir + idlFileNameOnly + "Publisher.c";
-                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("PublisherSource"), m_replace);
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("com/eprosima/microxrcedds/idl/templates/PublisherSource.stg"), m_replace);
                     project.addCommonSrcFile(fileName);
 
                     fileName = m_outputDir + idlFileNameOnly + "Subscriber.c";
-                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SubscriberSource"), m_replace);
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("com/eprosima/microxrcedds/idl/templates/SubscriberSource.stg"), m_replace);
                     project.addCommonSrcFile(fileName);
                 }
             }
@@ -391,7 +421,7 @@ public class microxrceddsgen {
     {
         boolean returnedValue = false;
         ST cmake = null;
-        STGroupFile cmakeTemplates = new STGroupFile("CMakeLists.stg", '$', '$');
+        STGroupFile cmakeTemplates = new STGroupFile("com/eprosima/microxrcedds/idl/templates/CMakeLists.stg", '$', '$');
 
         if (cmakeTemplates != null)
         {

@@ -14,8 +14,10 @@
 
 group TypesHeader;
 
+import "Common.stg"
+
 main(ctx, definitions) ::= <<
-$fileHeader(file=[ctx.filename, ".h"], description=["This header file contains the declaration of the described types in the IDL file."])$
+$fileHeader(ctx=ctx, file=[ctx.filename, ".h"], description=["This header file contains the declaration of the described types in the IDL file."])$
 
 #ifndef _$ctx.filename;format="toUpper"$_H_
 #define _$ctx.filename;format="toUpper"$_H_
@@ -106,7 +108,7 @@ bitset_type(ctx, parent, bitset, extensions) ::= <<>>
 enum_type(ctx, parent, enum) ::= <<
 typedef enum $enum.name$
 {
-    $enum.members:{$it.name$}; separator=",\n"$
+    $enum.members:{it | $it.name$}; separator=",\n"$
 } $enum.name$;
 
 typedef uint32_t $enum.name$_cdr;

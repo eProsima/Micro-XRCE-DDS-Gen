@@ -14,6 +14,8 @@
 
 group ProtocolHeader;
 
+import "Common.stg"
+
 main(ctx, definitions) ::= <<
 $fileHeader(ctx=ctx,  file=[ctx.filename, "SerializationSource.c"], description=["This file contains serialization code."])$
 
@@ -25,49 +27,121 @@ $fileHeader(ctx=ctx,  file=[ctx.filename, "SerializationSource.c"], description=
 #include <inttypes.h>
 #include <string.h>
 
-$ctx.directIncludeDependencies:{#include "$it$Serialization.h"}; separator="\n"$
+$ctx.directIncludeDependencies:{ it | #include "$it$Serialization.h"}; separator="\n"$
 
 $definitions; separator="\n"$
 
 >>
 
 module(ctx, parent, module, definition_list) ::= <<
+
 $definition_list$
+
 >>
 
 definition_list(definitions) ::= <<
+
 $definitions; separator="\n"$
+
 >>
 
-struct_type(ctx, parent, struct) ::= <<
+annotation(ctx, annotation) ::= <<>>
+
+const_decl(ctx, parent, const, const_type) ::= <<
+
+$const_type$
+
+>>
+
+typedef_decl(ctx, parent, typedefs, typedefs_type, declarator_type) ::= <<
+
+$declarator_type$
+$typedefs_type$
+
+>>
+
+fwd_decl(ctx, parent, type) ::= <<>>
+
+struct_type(ctx, parent, struct, member_list) ::= <<
+
 void print$struct.cScopedname$($struct.cScopedname$* topic)
 {
     printf("$struct.cScopedname$: { \n");
-    $struct.members:{$member_print(typecode=it.typecode, name=it.name, name=it.name)$}; separator="\n"$
+    $struct.members:{ it | $member_print(typecode=it.typecode, name=it.name, originName=it.name)$}; separator="\n"$
     printf("}\n");
 }
 
 void initialize$struct.cScopedname$($struct.cScopedname$* topic)
 {
-    $struct.members:{$member_assignment(typecode=it.typecode, name=it.name, name=it.name)$}; separator="\n"$
+    $struct.members:{it | $member_assignment(typecode=it.typecode, name=it.name, originName=it.name)$}; separator="\n"$
 }
 >>
 
-union_type(ctx, parent, union) ::= <<>>
+member_type(ctx, member, type_member, declarators) ::= <<
+
+$type_member$
+$declarators$
+
+>>
+
+union_type(ctx, parent, union, extensions, switch_type) ::= <<
+
+$switch_type$
+
+>>
+
+element_type(ctx, element, type_element, declarator) ::= <<
+
+$type_element$
+$declarator$
+
+>>
+
+bitset_type(ctx, parent, bitset, extensions) ::= <<>>
 
 enum_type(ctx, parent, enum) ::= <<>>
 
 bitmask_type(ctx, parent, bitmask) ::= <<>>
 
-typedef_decl(ctx, parent, typedefs) ::= <<>>
+sequence_type(ctx, sequence, type_sequence) ::= <<
 
-annotation(ctx, annotation) ::= <<>>
+$type_sequence$
 
-fwd_decl(ctx, parent, type) ::= <<>>
+>>
 
-bitset_type(ctx, parent, bitset) ::= <<>>
+map_type(ctx, map, key_type, value_type) ::= <<
 
-const_decl(ctx, parent, const) ::= <<>>
+$key_type$
+$value_type$
+
+>>
+
+string_type(ctx, string) ::= <<>>
+
+wide_string_type(ctx, wstring) ::= <<>>
+
+array_declarator(ctx, array, array_type) ::= <<>>
+
+interface(ctx, parent, interface, export_list) ::= <<>>
+
+export_list(exports) ::= <<>>
+
+exception(ctx, parent, exception) ::= <<>>
+
+operation(ctx, parent, operation, param_list, operation_type) ::= <<
+
+$operation_type$
+$param_list$
+
+>>
+
+param_list(parameters) ::= <<>>
+
+param(parameter, parameter_type) ::= <<
+
+$parameter_type$
+
+>>
 
 // ========================================================================================
 //                                      ASSIGNMENT

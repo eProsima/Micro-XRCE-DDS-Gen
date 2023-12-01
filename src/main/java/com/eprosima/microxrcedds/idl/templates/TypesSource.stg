@@ -14,8 +14,10 @@
 
 group TypesSource;
 
+import "Common.stg"
+
 main(ctx, definitions) ::= <<
-$fileHeader(file=[ctx.filename, ".c"], description=["This source file contains the definition of the described types in the IDL file."])$
+$fileHeader(ctx=ctx, file=[ctx.filename, ".h"], description=["This header file contains the declaration of the described types in the IDL file."])$
 
 #include "$ctx.filename$.h"
 
@@ -35,24 +37,19 @@ $definitions; separator="\n"$
 
 annotation(ctx, annotation) ::= <<>>
 
-interface(ctx, parent, interface, export_list) ::= <<>>
+const_decl(ctx, parent, const, const_type) ::= <<
+$const_type$
+>>
 
-export_list(exports) ::= <<>>
+typedef_decl(ctx, parent, typedefs, typedefs_type, declarator_type) ::= <<
+$declarator_type$
+$typedefs_type$
+>>
 
-exception(ctx, parent, exception) ::= <<>>
+fwd_decl(ctx, parent, type) ::= <<>>
 
-operation(ctx, parent, operation, param_list) ::= <<>>
+struct_type(ctx, parent, struct, member_list) ::= <<
 
-param_list(parameters) ::= <<>>
-
-param(parameter) ::= <<>>
-
-const_decl(ctx, parent, const) ::= <<>>
-
-typedef_decl(ctx, parent, typedefs) ::= <<>>
-
-// TODO: is possible to remove previousSize of size_of_topic function easily?
-struct_type(ctx, parent, struct, extensions) ::= <<
 bool $struct.cScopedname$_serialize_topic(ucdrBuffer* writer, const $struct.cScopedname$* topic)
 {
     bool success = true;
@@ -63,7 +60,7 @@ bool $struct.cScopedname$_serialize_topic(ucdrBuffer* writer, const $struct.cSco
     $member_serialization(ctx=ctx, typecode=member.typecode.typedefContentTypeCode, name=member.name, originName=member.name)$
     $else$
     $member_serialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$
-    $endif$}; separator="\n"$
+    $endif$}; separator=""$
     return success && !writer->error;
 }
 
@@ -77,7 +74,7 @@ bool $struct.cScopedname$_deserialize_topic(ucdrBuffer* reader, $struct.cScopedn
     $member_deserialization(ctx=ctx, typecode=member.typecode.typedefContentTypeCode, name=member.name, originName=member.name)$
     $else$
     $member_deserialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$
-    $endif$}; separator="\n"$
+    $endif$}; separator=""$
     return success && !reader->error;
 }
 
@@ -90,15 +87,78 @@ uint32_t $struct.cScopedname$_size_of_topic(const $struct.cScopedname$* topic, u
     $member_size(ctx=ctx, typecode=member.typecode.typedefContentTypeCode, name=member.name, originName=member.name)$
     $else$
     $member_size(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$
-    $endif$}; separator="\n"$
+    $endif$}; separator=""$
     return size - previousSize;
 }
 
 >>
 
-union_type(ctx, parent, union) ::= <<>>
+member_type(ctx, member, type_member, declarators) ::= <<
+
+$type_member$
+$declarators$
+
+>>
+
+union_type(ctx, parent, union, extensions, switch_type) ::= <<
+
+$switch_type$
+
+>>
+
+element_type(ctx, element, type_element, declarator) ::= <<
+
+$type_element$
+$declarator$
+
+>>
+
+bitset_type(ctx, parent, bitset, extensions) ::= <<>>
 
 enum_type(ctx, parent, enum) ::= <<>>
+
+bitmask_type(ctx, parent, bitmask) ::= <<>>
+
+sequence_type(ctx, sequence, type_sequence) ::= <<
+
+$type_sequence$
+
+>>
+
+map_type(ctx, map, key_type, value_type) ::= <<
+
+$key_type$
+$value_type$
+
+>>
+
+string_type(ctx, string) ::= <<>>
+
+wide_string_type(ctx, wstring) ::= <<>>
+
+array_declarator(ctx, array, array_type) ::= <<>>
+
+interface(ctx, parent, interface, export_list) ::= <<>>
+
+export_list(exports) ::= <<>>
+
+exception(ctx, parent, exception) ::= <<>>
+
+operation(ctx, parent, operation, param_list, operation_type) ::= <<
+
+$operation_type$
+$param_list$
+
+>>
+
+param_list(parameters) ::= <<>>
+
+param(parameter, parameter_type) ::= <<
+
+$parameter_type$
+
+>>
+
 
 // ========================================================================================
 //                                     SERIALIZATION
