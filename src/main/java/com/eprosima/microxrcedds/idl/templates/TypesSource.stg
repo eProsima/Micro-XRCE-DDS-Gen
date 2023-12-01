@@ -186,7 +186,7 @@ $else$
 success &= ucdr_serialize_uint32_t(writer, topic->$name$_size);
 for(size_t i = 0; i < topic->$name$_size; ++i)
 {
-    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
+    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
 }
 $endif$
 >>
@@ -202,12 +202,12 @@ success &= ucdr_serialize_array_$typecode.cTypename$(writer, topic->$name$, size
 $elseif(typecode.contentTypeCode.isType_d)$
 for(size_t i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
 {
-    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=originName)$
+    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=originName)$
 }
 $else$
 for(size_t i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 {
-    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=originName)$
+    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=originName)$
 }
 $endif$
 >>
@@ -244,7 +244,7 @@ else
 {
     for(size_t i = 0; i < topic->$name$_size; ++i)
     {
-        $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
+        $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
     }
 }
 $endif$
@@ -261,12 +261,12 @@ success &= ucdr_deserialize_array_$typecode.cTypename$(reader, topic->$name$, si
 $elseif(typecode.contentTypeCode.isType_d)$
 for(size_t i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
 {
-    $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=originName)$
+    $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=originName)$
 }
 $else$
 for(size_t i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 {
-    $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=originName)$
+    $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=originName)$
 }
 $endif$
 >>
@@ -295,7 +295,7 @@ size += ucdr_alignment(size, $typecode.contentTypeCode.size$) + topic->$name$_si
 $else$
 for(size_t i = 0; i < topic->$name$_size; ++i)
 {
-    $member_size(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
+    $member_size(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
 }
 $endif$
 >>
@@ -311,12 +311,12 @@ size += ucdr_alignment(size, $typecode.contentTypeCode.size$) + sizeof(topic->$n
 $elseif(typecode.contentTypeCode.isType_d)$
 for(size_t i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
 {
-    $member_size(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=originName)$
+    $member_size(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=originName)$
 }
 $else$
 for(size_t i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 {
-    $member_size(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=originName)$
+    $member_size(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=originName)$
 }
 $endif$
 >>

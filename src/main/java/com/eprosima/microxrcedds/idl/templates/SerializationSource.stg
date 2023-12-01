@@ -169,12 +169,12 @@ memset(topic->$name$, rand(), topic->$name$_size * $typecode.contentTypeCode.siz
 $else$
 for(size_t i = 0; i < topic->$name$_size; ++i)
 {
-    $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
+    $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
 }
 $endif$
 >>
 
-array_assigment(typecode, name, originalName, dimensions) ::= <<
+array_assigment(typecode, name, originName, dimensions) ::= <<
 $if(rest(dimensions))$
 for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$) / sizeof(topic->$name$[0]); ++i$length(dimensions)$)
 {
@@ -185,12 +185,12 @@ memset(topic->$name$, rand(), sizeof(topic->$name$));
 $elseif(typecode.contentTypeCode.isType_d)$
 for(size_t i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
 {
-    $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
+    $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
 }
 $else$
 for(size_t i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 {
-    $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
+    $member_assignment(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
 }
 $endif$
 >>
@@ -221,12 +221,12 @@ $else$
 printf("$name$: \n");
 for(size_t i = 0; i < topic->$name$_size; ++i)
 {
-    $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
+    $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
 }
 $endif$
 >>
 
-array_print(typecode, name, originalName, dimensions) ::= <<
+array_print(typecode, name, originName, dimensions) ::= <<
 $if(rest(dimensions))$
 printf("$name$: \n");
 for(int i$length(dimensions)$ = 0; i$length(dimensions)$ < sizeof(topic->$name$) / sizeof(topic->$name$[0]); ++i$length(dimensions)$)
@@ -240,13 +240,13 @@ $elseif(typecode.contentTypeCode.isType_d)$
 printf("$name$: \n");
 for(size_t i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
 {
-    $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
+    $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
 }
 $else$
 printf("$name$: \n");
 for(size_t i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 {
-    $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
+    $member_print(typecode=typecode.contentTypeCode, name=indexName(name=name, suffix="i"), originName=name)$
 }
 $endif$
 >>

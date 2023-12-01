@@ -37,4 +37,4 @@ fileHeader(ctx, file, description) ::= <<
  */
 >>
 
-indexName(name, suffix) ::= <<$name$[i$suffix$]>>
+indexName(name, suffix) ::= <<$name$[$suffix$]>>
