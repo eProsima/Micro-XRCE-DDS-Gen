@@ -28,6 +28,7 @@ find_package(microxrcedds_client REQUIRED)
 
 set(SRCS
     $solution.projects : { project | $project.name$.c}; separator="\n"$
+    $solution.projects : { project | $project.dependencies : {it | $it$.c}; separator=" "$ }; separator="\n"$
     )
 
 $solution.projects : {it | $execs(project=it, libraries=solution.libraries, examples=examples, test=test)$}; separator="\n"$

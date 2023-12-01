@@ -201,6 +201,12 @@ public class microxrceddsgen {
 
                 if (project != null) {
                     solution.addProject(project);
+
+                    for (String file : project.getDependencies()) {
+                        String idl_file = Util.getIDLFileDirectoryOnly(m_idlFiles.get(count)) + file + ".idl";
+                        System.out.println("Adding dependency project " + idl_file);
+                        Project depProject = process(idl_file);
+                    }
                 } else {
                     returnedValue = false;
                 }
