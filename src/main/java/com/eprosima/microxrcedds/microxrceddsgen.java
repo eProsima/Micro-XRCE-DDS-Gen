@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.eprosima.uxr;
+package com.eprosima.microxrcedds;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,18 +27,11 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.util.jar.Manifest;
 
-import org.antlr.stringtemplate.StringTemplate;
-import org.antlr.stringtemplate.StringTemplateErrorListener;
-import org.antlr.stringtemplate.StringTemplateGroup;
-import org.antlr.stringtemplate.language.DefaultTemplateLexer;
-import org.antlr.v4.runtime.ANTLRFileStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-
-import com.eprosima.uxr.exceptions.BadArgumentException;
-import com.eprosima.uxr.idl.grammar.Context;
+import com.eprosima.microxrcedds.exceptions.BadArgumentException;
+import com.eprosima.microxrcedds.idl.grammar.Context;
 import com.eprosima.solution.Project;
 import com.eprosima.solution.Solution;
-import com.eprosima.uxr.util.Utils;
+import com.eprosima.microxrcedds.util.Utils;
 import com.eprosima.idl.generator.manager.TemplateGroup;
 import com.eprosima.idl.generator.manager.TemplateManager;
 import com.eprosima.idl.parser.grammar.IDLLexer;
@@ -50,6 +43,11 @@ import com.eprosima.idl.parser.typecode.PrimitiveTypeCode;
 import com.eprosima.idl.parser.typecode.Kind;
 import com.eprosima.idl.util.Util;
 import com.eprosima.log.ColorMessage;
+
+import org.stringtemplate.v4.*;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 
 public class microxrceddsgen {
 
@@ -146,26 +144,6 @@ public class microxrceddsgen {
     /*
      * ----------------------------------------------------------------------------------------
      *
-     * Listener classes
-     */
-
-    class TemplateErrorListener implements StringTemplateErrorListener
-    {
-        public void error(String arg0, Throwable arg1)
-        {
-            System.out.println(ColorMessage.error() + arg0);
-            arg1.printStackTrace();
-        }
-
-        public void warning(String arg0)
-        {
-            System.out.println(ColorMessage.warning() + arg0);
-        }
-    }
-
-    /*
-     * ----------------------------------------------------------------------------------------
-     *
      * Main methods
      */
 
@@ -187,7 +165,6 @@ public class microxrceddsgen {
 
             // Load string templates
             System.out.println("Loading templates...");
-            TemplateManager.setGroupLoaderDirectories("com/eprosima/uxr/idl/templates");
 
             for (int count = 0; returnedValue && (count < m_idlFiles.size()); ++count) {
                 Project project = process(m_idlFiles.get(count));
@@ -319,26 +296,26 @@ public class microxrceddsgen {
             TemplateManager tmanager = new TemplateManager("Common", ctx, false);
 
             // Load common types template
-            tmanager.addGroup("TypesHeader");
-            tmanager.addGroup("TypesSource");
+            tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/TypesHeader.stg");
+            // tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/TypesSource.stg");
 
-            // Load Publisher template
-            tmanager.addGroup("PublisherSource");
+            // // Load Publisher template
+            // tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/PublisherSource.stg");
 
-            // Load Subscriber template
-            tmanager.addGroup("SubscriberSource");
+            // // Load Subscriber template
+            // tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SubscriberSource.stg");
 
-            // Load test template
-            tmanager.addGroup("SerializationTestSource");
-            tmanager.addGroup("SerializationSource");
-            tmanager.addGroup("SerializationHeader");
+            // // Load test template
+            // tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SerializationTestSource.stg");
+            // tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SerializationSource.stg");
+            // tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SerializationHeader.stg");
 
             // Create main template
             TemplateGroup maintemplates = tmanager.createTemplateGroup("main");
             maintemplates.setAttribute("ctx", ctx);
 
             try {
-                ANTLRFileStream input = new ANTLRFileStream(idlParseFileName);
+                CharStream input = CharStreams.fromFileName(idlParseFileName);
                 IDLLexer lexer = new IDLLexer(input);
                 lexer.setContext(ctx);
                 CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -413,18 +390,18 @@ public class microxrceddsgen {
     private boolean genCMakeLists(Solution solution)
     {
         boolean returnedValue = false;
-
-        StringTemplateGroup cmakeTemplates = StringTemplateGroup.loadGroup("CMakeLists", DefaultTemplateLexer.class, null);
+        ST cmake = null;
+        STGroupFile cmakeTemplates = new STGroupFile("CMakeLists.stg", '$', '$');
 
         if (cmakeTemplates != null)
         {
-            StringTemplate cmakelists = cmakeTemplates.getInstanceOf("cmakelists");
+            cmake = cmakeTemplates.getInstanceOf("cmakelists");
 
-            cmakelists.setAttribute("solution", solution);
-            cmakelists.setAttribute("examples", m_exampleOption);
-            cmakelists.setAttribute("test", m_test);
+            cmake.add("solution", solution);
+            cmake.add("examples", m_exampleOption);
+            cmake.add("test", m_test);
 
-            returnedValue = Utils.writeFile(m_outputDir + "CMakeLists.txt", cmakelists, m_replace);
+            returnedValue = Utils.writeFile(m_outputDir + "CMakeLists.txt", cmake, m_replace);
         }
 
         return returnedValue;

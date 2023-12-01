@@ -1,4 +1,4 @@
-// Copyright 2016 Proyectos y Sistemas de Mantenimiento SL (eProsima).
+// Copyright 2016-2020 Proyectos y Sistemas de Mantenimiento SL (eProsima).
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,25 +12,118 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // internal plugins
+
 apply plugin: 'java-library'
 apply plugin: 'eclipse' // Eclipse integration
 
-version = '2.0.2'
-description = 'Build script with all necessary tasks to compile and test MicroXRCEDDSGen'
+description = """"""
+def version_str = "3.1.0"
+
+import org.apache.tools.ant.taskdefs.condition.Os;
+import org.gradle.api.tasks.options.Option;
+
+/**
+ * Task class to install microxrceddsgen in a specific path
+ * @author eProsima
+ * @author Nuno Marques <nuno.marques@dronesolutions.io>
+ * @author Miguel Company <MiguelCompany@eprosima.com>
+ * @version 2.0.0
+ * @since 2020-03-31
+ */
+public class InstallPath extends DefaultTask {
+    private String path = "";
+
+    /**
+     * Setter for the install path
+     * @param path install path given by the task option "install_path"
+     */
+    @Option(option = "install_path", description = "Absolute path to the install dir")
+    public void setInstallPath(String path) {
+        this.path = path;
+    }
+
+    /**
+     * Getter of the install path
+     */
+    @Input
+    public String getInstallPath() {
+        return path;
+    }
+
+    /**
+     * Uses Gradle project Copy() to copy files
+     * @param input file to copy
+     * @param ouput destination directory
+     */
+    private void copy(String input, String output) {
+        project.copy {
+            from project.file(input)
+            into project.file(output)
+        }
+    }
+
+    /**
+     * Install Task Action that copies the script and jar files
+     */
+    @TaskAction
+    private void install() {
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            final String install_path = (path != null && !path.isEmpty()) ? path : "C:\\Program Files\\microxrceddsgen\\";
+
+            // Copy script
+            copy("scripts\\microxrceddsgen.bat", new File(install_path, "bin\\").getAbsolutePath())
+            // Copy jar
+            copy("share\\microxrceddsgen\\java\\microxrceddsgen.jar", new File(install_path, "share\\microxrceddsgen\\java\\").getAbsolutePath())
+
+        } else if (Os.isFamily(Os.FAMILY_UNIX) || Os.isFamily(Os.FAMILY_MAC)) {
+            final String install_path = (path != null && !path.isEmpty()) ? path : "/usr/local/";
+
+            // Copy script
+            copy("scripts/microxrceddsgen", new File(install_path, "bin/").getAbsolutePath())
+            // Copy jar
+            copy("share/microxrceddsgen/java/microxrceddsgen.jar", new File(install_path, "share/microxrceddsgen/java/").getAbsolutePath())
+        }
+    }
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation files('thirdparty/IDL-Parser/build/libs/idlparser-1.6.0.jar')
+    implementation files('thirdparty/IDL-Parser/build/libs/idlparser-2.0.0.jar')
     testImplementation('org.junit.jupiter:junit-jupiter-api:5.5.2')
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.5.2')
+}
+
+task submodulesUpdate(type: Exec) {
+    description 'Updates (and inits) git submodules'
+    commandLine 'git', 'submodule', 'update', '--init'
 }
 
 task buildIDLParser(type: GradleBuild) {
     dir = 'thirdparty/IDL-Parser'
     tasks = ['clean', 'build']
+}
+buildIDLParser.dependsOn submodulesUpdate
+
+task copyResources {
+    // Copy platforms file
+    File outputDir = file(new File("${project.buildDir}", "resources/main"))
+    outputDir.exists() || outputDir.mkdirs()
+    File versionFile = new File("${project.buildDir}/resources/main/version")
+    outputs.file versionFile
+    doLast {
+        // Create version file
+        Properties pversion = new Properties()
+        project.hasProperty('customversion')
+            ? pversion.setProperty('version', project.customversion.toString())
+            : pversion.setProperty('version', version_str)
+        versionFile.withWriter {
+            pversion.store(it, null)
+        }
+    }
+
 }
 
 sourceSets {
@@ -38,7 +131,13 @@ sourceSets {
         java {
             srcDir 'src/main/java'
         }
+
+        resources {
+            srcDir 'src/main/java'
+            include '**/*.stg'
+        }
     }
+
     test {
         java {
             srcDir 'src/test/java'
@@ -49,34 +148,32 @@ sourceSets {
 jar {
     duplicatesStrategy 'exclude'
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    baseName = 'microxrceddsgen'
-    archiveName = "${jar.baseName}.${jar.extension}"
+    archiveBaseName = 'microxrceddsgen'
     manifest {
         attributes(
-                "Created-By": "eProsima",
-                "Main-Class": "com.eprosima.uxr.microxrceddsgen",
-                "Specification-Version": version,
-                "Class-Path": configurations.runtimeClasspath.collect { it.getName() }.join(' ')
-                )
+            "Created-By": "eProsima",
+            "Main-Class": "com.eprosima.microxrcedds.microxrceddsgen",
+            "Class-Path": configurations.runtimeClasspath.collect { it.getName() }.join(' ')
+            )
     }
     doLast
     {
         copy {
             from jar
-            into "share/microxrcedds"
+            into "share/microxrceddsgen/java"
         }
     }
 }
 
-processResources() {
-    duplicatesStrategy = 'EXCLUDE'
+compileJava.dependsOn buildIDLParser,copyResources
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    options.compilerArgs.add('-Xlint:deprecation')
+    options.compilerArgs.add('-Xlint:unchecked')
 }
 
-compileJava.dependsOn buildIDLParser
-compileJava {
-    sourceCompatibility = 11
-    targetCompatibility = 11
-}
+task install(type: InstallPath, group: "Install", description: "Install microxrceddsgen script and microxrceddsgen.jar")
 
 test {
     useJUnitPlatform()

@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.eprosima.uxr.util;
+package com.eprosima.microxrcedds.util;
 
-import org.antlr.stringtemplate.StringTemplate;
+import org.stringtemplate.v4.ST;
 
 import java.io.*;
-import java.util.Scanner;
 
 public class Utils
 {
@@ -57,9 +56,9 @@ public class Utils
         // Remove extension
         index = auxString.lastIndexOf('.');
         if(index != -1)
-        	auxString = auxString.substring(0, index);
+            auxString = auxString.substring(0, index);
 
-       	returnedValue = auxString;
+        returnedValue = auxString;
 
         return returnedValue;
     }
@@ -75,7 +74,7 @@ public class Utils
         return returnedValue;
     }
 
-    public static boolean writeFile(String file, StringTemplate template, boolean replace)
+    public static boolean writeFile(String file, ST template, boolean replace)
     {
         boolean returnedValue = false;
 
@@ -86,7 +85,7 @@ public class Utils
             if(!handle.exists() || replace)
             {
                 FileWriter fw = new FileWriter(file);
-                String data = template.toString();
+                String data = template.render();
                 fw.write(data, 0, data.length());
                 fw.close();
             }
@@ -105,36 +104,10 @@ public class Utils
         return returnedValue;
     }
 
-    public static boolean searchInFile(String fileName, String searchText)
+    public static String getFileExtension(String fileName)
     {
-        Scanner scan = null;
-        try
-        {
-            scan = new Scanner(new File(fileName));
-            while(scan.hasNext()){
-                String line = scan.nextLine().toLowerCase().toString();
-                if(line.contains(searchText)){
-                    return true;
-                }
-            }
-        } 
-        catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            if(scan != null)
-                scan.close();
-        }
+        int lastDot = fileName.lastIndexOf(".");
 
-        return false;
+        return fileName.substring(lastDot+1);
     }
-
-	public static String getFileExtension(String fileName)
-	{
-		int lastDot = fileName.lastIndexOf(".");
-
-		return fileName.substring(lastDot+1);
-	}
 }

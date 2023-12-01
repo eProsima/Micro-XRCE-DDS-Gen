@@ -1,4 +1,4 @@
-package com.eprosima.uxr.integration;
+package com.eprosima.microxrcedds.integration;
 
 import org.junit.jupiter.api.Test;
 

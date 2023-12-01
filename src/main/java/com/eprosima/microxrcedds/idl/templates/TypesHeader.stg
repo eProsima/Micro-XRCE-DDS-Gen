@@ -25,10 +25,6 @@ extern "C"
 {
 #endif
 
-$if(ctx.printexception)$
-#include <$ctx.product$/exceptions/UserException.h>
-$endif$
-
 #include <stdint.h>
 #include <stdbool.h>
 $ctx.directIncludeDependencies : {include | #include "$include$.h"}; separator="\n"$
@@ -40,6 +36,7 @@ $definitions; separator="\n"$
 #endif
 
 #endif // _$ctx.filename;format="toUpper"$_H_
+
 >>
 
 module(ctx, parent, module, definition_list) ::= <<
@@ -51,24 +48,20 @@ $definitions; separator="\n"$
 >>
 
 annotation(ctx, annotation) ::= <<>>
-interface(ctx, parent, interface, export_list) ::= <<>>
-export_list(exports) ::= <<>>
-exception(ctx, parent, exception) ::= <<>>
-operation(ctx, parent, operation, param_list) ::= <<>>
-param_list(parameters) ::= <<>>
-param(parameter) ::= <<>>
-const_decl(ctx, parent, const) ::= <<>>
+const_decl(ctx, parent, const, const_type) ::= <<>>
 
-typedef_decl(ctx, parent, typedefs) ::= <<
+typedef_decl(ctx, parent, typedefs, typedefs_type, declarator_type) ::= <<
+$declarator_type$
 $typedefs :
 { typedef |
 $if(!typedef.isType_10)$
 typedef $typedef.typedefContentTypeCode.cTypename$ $typedef.name$
 $endif$
-}; separator="\n"$
->>
+}; separator="\n"$>>
 
-struct_type(ctx, parent, struct, extensions) ::= <<
+fwd_decl(ctx, parent, type) ::= <<>>
+
+struct_type(ctx, parent, struct, member_list) ::= <<
 $if(parent)$
 $else$
 /*!
@@ -79,18 +72,37 @@ $endif$
 
 typedef struct $struct.cScopedname$
 {
-    $struct.members:{$member_declaration(it)$}; separator="\n"$
+    $struct.members:{ member | $member_declaration(member)$}; separator=""$
 } $struct.cScopedname$;
 
 struct ucdrBuffer;
-
 bool $struct.cScopedname$_serialize_topic(struct ucdrBuffer* writer, const $struct.cScopedname$* topic);
 bool $struct.cScopedname$_deserialize_topic(struct ucdrBuffer* reader, $struct.cScopedname$* topic);
 uint32_t $struct.cScopedname$_size_of_topic(const $struct.cScopedname$* topic, uint32_t size);
+>>
+
+member_type(ctx, member, type_member, declarators) ::= <<
+
+$type_member$
+$declarators$
 
 >>
 
-union_type(ctx, parent, union, extensions) ::= <<>>
+union_type(ctx, parent, union, extensions, switch_type) ::= <<
+
+$switch_type$
+
+>>
+
+element_type(ctx, element, type_element, declarator) ::= <<
+
+$type_element$
+$declarator$
+
+>>
+
+bitset_type(ctx, parent, bitset, extensions) ::= <<>>
+
 enum_type(ctx, parent, enum) ::= <<
 typedef enum $enum.name$
 {
@@ -100,7 +112,51 @@ typedef enum $enum.name$
 typedef uint32_t $enum.name$_cdr;
 >>
 
-/***** Utils *****/
+bitmask_type(ctx, parent, bitmask) ::= <<>>
+
+sequence_type(ctx, sequence, type_sequence) ::= <<
+
+$type_sequence$
+
+>>
+
+map_type(ctx, map, key_type, value_type) ::= <<
+
+$key_type$
+$value_type$
+
+>>
+
+string_type(ctx, string) ::= <<>>
+
+wide_string_type(ctx, wstring) ::= <<>>
+
+array_declarator(ctx, array, array_type) ::= <<>>
+
+interface(ctx, parent, interface, export_list) ::= <<>>
+
+export_list(exports) ::= <<>>
+
+exception(ctx, parent, exception) ::= <<>>
+
+operation(ctx, parent, operation, param_list, operation_type) ::= <<
+
+$operation_type$
+$param_list$
+
+>>
+
+param_list(parameters) ::= <<>>
+
+param(parameter, parameter_type) ::= <<
+
+$parameter_type$
+
+>>
+
+
+
+// XRCE Utils
 
 member_declaration(member) ::= <<
 $if(member.typecode.isType_d)$
@@ -127,5 +183,3 @@ $else$
 $member.typecode.cTypename$ $member.name$;
 $endif$
 >>
-
-unionmember_declaration(member) ::= <<>>

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.eprosima.uxr.idl.grammar;
+package com.eprosima.microxrcedds.idl.grammar;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -21,9 +21,9 @@ import com.eprosima.idl.parser.tree.Interface;
 import com.eprosima.idl.parser.tree.TypeDeclaration;
 import com.eprosima.idl.parser.tree.Annotation;
 import com.eprosima.idl.parser.typecode.Kind;
-import com.eprosima.uxr.idl.parser.typecode.StructTypeCode;
+import com.eprosima.microxrcedds.idl.parser.typecode.StructTypeCode;
 
-public class Context extends com.eprosima.idl.context.Context implements com.eprosima.uxr.idl.context.Context
+public class Context extends com.eprosima.idl.context.Context implements com.eprosima.microxrcedds.idl.context.Context
 {
     public Context(String filename, String file, ArrayList<String> includePaths, boolean subscribercode, boolean publishercode)
     {
