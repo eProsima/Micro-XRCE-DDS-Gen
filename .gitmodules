@@ -1,6 +1,3 @@
 [submodule "thirdparty/IDL-Parser"]
 	path = thirdparty/IDL-Parser
     url = https://github.com/eProsima/IDL-Parser.git
-[submodule "IDL-Test-Types"]
-	path = IDL-Test-Types
-	url = https://github.com/eProsima/dds-types-test
