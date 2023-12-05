@@ -63,6 +63,7 @@ public class microxrceddsgen {
     private String m_tempDir = null;
     protected static String m_appName = "microxrceddsgen";
     protected boolean m_test = false;
+    protected String m_defaultContainerPreallocSize = "50";
 
     protected static String m_localAppProduct = "microxrcedds";
     private ArrayList<String> m_includePaths = new ArrayList<String>();
@@ -157,6 +158,14 @@ public class microxrceddsgen {
                 else
                 {
                     throw new BadArgumentException("No CDR version specified after -cdr argument");
+                }
+            }
+            else if (arg.equals("-default-container-prealloc-size"))
+            {
+                if (count < args.length) {
+                    m_defaultContainerPreallocSize = args[count++];
+                } else {
+                    throw new BadArgumentException("No value specified after -default-container-prealloc-size argument");
                 }
             }
             else { // TODO: More options: -local, -rpm, -debug
@@ -313,7 +322,11 @@ public class microxrceddsgen {
         }
 
         if (idlParseFileName != null) {
-            Context ctx = new Context(idlFileNameOnly, idlFileName, m_includePaths, true, true);
+            // Create template manager
+            TemplateManager tmanager = new TemplateManager();
+
+            // Create context
+            Context ctx = new Context(tmanager, idlFileNameOnly, idlFileName, m_includePaths, true, true, m_defaultContainerPreallocSize);
 
             if (m_case_sensitive)
             {
@@ -327,9 +340,6 @@ public class microxrceddsgen {
             // Create default @Topic annotation.
             AnnotationDeclaration topicann = ctx.createAnnotationDeclaration("Topic", null);
             topicann.addMember(new AnnotationMember("value", new PrimitiveTypeCode(Kind.KIND_BOOLEAN), "true"));
-
-            // Create template manager
-            TemplateManager tmanager = new TemplateManager("Common", ctx, false);
 
             // Load common types template
             tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/TypesHeader.stg");

@@ -260,7 +260,7 @@ printf("\n");
 >>
 
 print_array(typecode, name) ::= <<
-for(size_t i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
+for(size_t i = 0; i < sizeof(topic->$name$) / sizeof(topic->$name$[0]); ++i)
 {
     printf("%" PRIx64 " ", (uint64_t)topic->$name$[i]);
 }

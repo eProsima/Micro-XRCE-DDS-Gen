@@ -21,17 +21,21 @@ import com.eprosima.idl.parser.tree.Interface;
 import com.eprosima.idl.parser.tree.TypeDeclaration;
 import com.eprosima.idl.parser.tree.Annotation;
 import com.eprosima.idl.parser.typecode.Kind;
+import com.eprosima.idl.generator.manager.TemplateManager;
 import com.eprosima.microxrcedds.idl.parser.typecode.StructTypeCode;
+import com.eprosima.microxrcedds.idl.parser.typecode.SequenceTypeCode;
 
 public class Context extends com.eprosima.idl.context.Context implements com.eprosima.microxrcedds.idl.context.Context
 {
-    public Context(String filename, String file, ArrayList<String> includePaths, boolean subscribercode, boolean publishercode)
+    public Context(TemplateManager tmanager, String filename, String file, ArrayList<String> includePaths, boolean subscribercode, boolean publishercode, String default_unbounded_max_size)
     {
-        super(file, includePaths);
+        super(tmanager, file, includePaths, false);
         m_fileNameUpper = filename.toUpperCase();
         m_subscribercode = subscribercode;
         m_publishercode = publishercode;
         m_randomGenNames = new Stack<String>();
+        m_default_unbounded_max_size = default_unbounded_max_size;
+
     }
 
     public void setTypelimitation(String lt)
@@ -48,6 +52,14 @@ public class Context extends com.eprosima.idl.context.Context implements com.epr
     public StructTypeCode createStructTypeCode(String name)
     {
         return new StructTypeCode(getScope(), name);
+    }
+
+    private String m_default_unbounded_max_size;
+    @Override
+    public SequenceTypeCode createSequenceTypeCode(
+            String maxsize)
+    {
+        return new SequenceTypeCode(maxsize, evaluate_literal(maxsize), m_default_unbounded_max_size);
     }
 
     @Override

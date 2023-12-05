@@ -217,7 +217,7 @@ $endif$
 // ========================================================================================
 member_deserialization(ctx, typecode, name, originName) ::= <<
 $if(typecode.isType_c)$
-success &= ucdr_deserialize_uint32_t(reader, (uint32_t)&topic->$name$);
+success &= ucdr_deserialize_uint32_t(reader, (uint32_t*)&topic->$name$);
 $elseif(typecode.primitive)$
 success &= ucdr_deserialize_$typecode.cTypename$(reader, &topic->$name$);
 $elseif(typecode.isType_d)$

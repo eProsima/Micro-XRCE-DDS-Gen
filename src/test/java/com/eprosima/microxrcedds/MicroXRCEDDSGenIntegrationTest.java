@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class MicroXRCEDDSGenIntegrationTest
 {
-    private static final String INPUT_PATH = "test";
+    private static final String INPUT_PATH = "IDL-Test-Types/IDL";
     private static final String OUTPUT_PATH = "build/test/integration";
 
     private static boolean isUnix()
@@ -72,12 +72,6 @@ public class MicroXRCEDDSGenIntegrationTest
             blacklist_tests = java.util.Arrays.asList(blacklist_tests_str.split(",", -1));
         }
 
-        String cdr_version = System.getProperty("cdr_version");
-        if (null == cdr_version)
-        {
-            cdr_version = "v1";
-        }
-
         //Configure idl tests
         TestManager tests = new TestManager(
                 TestLevel.RUN,
@@ -85,7 +79,6 @@ public class MicroXRCEDDSGenIntegrationTest
                 INPUT_PATH,
                 OUTPUT_PATH + "/idls",
                 "CMake",
-                cdr_version,
                 list_tests,
                 blacklist_tests);
 
