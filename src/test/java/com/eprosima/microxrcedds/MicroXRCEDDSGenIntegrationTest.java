@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class MicroXRCEDDSGenIntegrationTest
 {
-    private static final String INPUT_PATH = "IDL-Test-Types/IDL";
+    private static final String INPUT_PATH = "thirdparty/IDL-Test-Types/IDL";
     private static final String OUTPUT_PATH = "build/test/integration";
 
     private static boolean isUnix()
