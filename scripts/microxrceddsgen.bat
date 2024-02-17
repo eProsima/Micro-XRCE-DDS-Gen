@@ -16,8 +16,6 @@ goto getarg
 :: Check java binary.
 set java_exec=java
 
-java -version > NUL 2>&1
-
 if not %ERRORLEVEL%==0 (
    if not "%JAVA_HOME%"=="" (
       set java_exec="%JAVA_HOME%\bin\java"
