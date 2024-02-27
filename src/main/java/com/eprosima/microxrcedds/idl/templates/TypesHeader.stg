@@ -108,12 +108,12 @@ $declarator$
 bitset_type(ctx, parent, bitset, extensions) ::= <<>>
 
 enum_type(ctx, parent, enum) ::= <<
-typedef enum $enum.name$
+typedef enum $enum.cScopedname$
 {
     $enum.members:{it | $it.name$}; separator=",\n"$
-} $enum.name$;
+} $enum.cScopedname$;
 
-typedef uint32_t $enum.name$_cdr;
+typedef uint32_t $enum.cScopedname$_cdr;
 >>
 
 bitmask_type(ctx, parent, bitmask) ::= <<>>
@@ -182,7 +182,7 @@ $endif$
 $elseif(member.typecode.isType_f)$
 $member.typecode.cTypename$ $member.name$$member.typecode.cTypeDimensions$;
 $elseif(member.typecode.isType_c)$
-$member.typecode.cTypename$_cdr $member.name$;
+$member.typecode.cScopedname$_cdr $member.name$;
 $else$
 $member.typecode.cTypename$ $member.name$;
 $endif$
