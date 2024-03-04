@@ -20,6 +20,7 @@ jobs:
         with:
           path: src/microxrceddsgen
           submodules: recursive
+          clean: true
 
       - uses: ./src/microxrceddsgen/.github/actions/install-apt-packages
 

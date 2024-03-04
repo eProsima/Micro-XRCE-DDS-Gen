@@ -14,8 +14,10 @@
 
 group TypesSource;
 
+import "Common.stg"
+
 main(ctx, definitions) ::= <<
-$fileHeader(file=[ctx.filename, ".c"], description=["This source file contains the definition of the described types in the IDL file."])$
+$fileHeader(ctx=ctx, file=[ctx.filename, ".h"], description=["This header file contains the declaration of the described types in the IDL file."])$
 
 #include "$ctx.filename$.h"
 
@@ -35,24 +37,19 @@ $definitions; separator="\n"$
 
 annotation(ctx, annotation) ::= <<>>
 
-interface(ctx, parent, interface, export_list) ::= <<>>
+const_decl(ctx, parent, const, const_type) ::= <<
+$const_type$
+>>
 
-export_list(exports) ::= <<>>
+typedef_decl(ctx, parent, typedefs, typedefs_type, declarator_type) ::= <<
+$declarator_type$
+$typedefs_type$
+>>
 
-exception(ctx, parent, exception) ::= <<>>
+fwd_decl(ctx, parent, type) ::= <<>>
 
-operation(ctx, parent, operation, param_list) ::= <<>>
+struct_type(ctx, parent, struct, member_list) ::= <<
 
-param_list(parameters) ::= <<>>
-
-param(parameter) ::= <<>>
-
-const_decl(ctx, parent, const) ::= <<>>
-
-typedef_decl(ctx, parent, typedefs) ::= <<>>
-
-// TODO: is possible to remove previousSize of size_of_topic function easily?
-struct_type(ctx, parent, struct, extensions) ::= <<
 bool $struct.cScopedname$_serialize_topic(ucdrBuffer* writer, const $struct.cScopedname$* topic)
 {
     bool success = true;
@@ -63,7 +60,7 @@ bool $struct.cScopedname$_serialize_topic(ucdrBuffer* writer, const $struct.cSco
     $member_serialization(ctx=ctx, typecode=member.typecode.typedefContentTypeCode, name=member.name, originName=member.name)$
     $else$
     $member_serialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$
-    $endif$}; separator="\n"$
+    $endif$}; separator=""$
     return success && !writer->error;
 }
 
@@ -77,7 +74,7 @@ bool $struct.cScopedname$_deserialize_topic(ucdrBuffer* reader, $struct.cScopedn
     $member_deserialization(ctx=ctx, typecode=member.typecode.typedefContentTypeCode, name=member.name, originName=member.name)$
     $else$
     $member_deserialization(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$
-    $endif$}; separator="\n"$
+    $endif$}; separator=""$
     return success && !reader->error;
 }
 
@@ -90,15 +87,78 @@ uint32_t $struct.cScopedname$_size_of_topic(const $struct.cScopedname$* topic, u
     $member_size(ctx=ctx, typecode=member.typecode.typedefContentTypeCode, name=member.name, originName=member.name)$
     $else$
     $member_size(ctx=ctx, typecode=member.typecode, name=member.name, originName=member.name)$
-    $endif$}; separator="\n"$
+    $endif$}; separator=""$
     return size - previousSize;
 }
 
 >>
 
-union_type(ctx, parent, union) ::= <<>>
+member_type(ctx, member, type_member, declarators) ::= <<
+
+$type_member$
+$declarators$
+
+>>
+
+union_type(ctx, parent, union, extensions, switch_type) ::= <<
+
+$switch_type$
+
+>>
+
+element_type(ctx, element, type_element, declarator) ::= <<
+
+$type_element$
+$declarator$
+
+>>
+
+bitset_type(ctx, parent, bitset, extensions) ::= <<>>
 
 enum_type(ctx, parent, enum) ::= <<>>
+
+bitmask_type(ctx, parent, bitmask) ::= <<>>
+
+sequence_type(ctx, sequence, type_sequence) ::= <<
+
+$type_sequence$
+
+>>
+
+map_type(ctx, map, key_type, value_type) ::= <<
+
+$key_type$
+$value_type$
+
+>>
+
+string_type(ctx, string) ::= <<>>
+
+wide_string_type(ctx, wstring) ::= <<>>
+
+array_declarator(ctx, array, array_type) ::= <<>>
+
+interface(ctx, parent, interface, export_list) ::= <<>>
+
+export_list(exports) ::= <<>>
+
+exception(ctx, parent, exception) ::= <<>>
+
+operation(ctx, parent, operation, param_list, operation_type) ::= <<
+
+$operation_type$
+$param_list$
+
+>>
+
+param_list(parameters) ::= <<>>
+
+param(parameter, parameter_type) ::= <<
+
+$parameter_type$
+
+>>
+
 
 // ========================================================================================
 //                                     SERIALIZATION
@@ -126,7 +186,7 @@ $else$
 success &= ucdr_serialize_uint32_t(writer, topic->$name$_size);
 for(size_t i = 0; i < topic->$name$_size; ++i)
 {
-    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
+    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=name)$
 }
 $endif$
 >>
@@ -142,12 +202,12 @@ success &= ucdr_serialize_array_$typecode.cTypename$(writer, topic->$name$, size
 $elseif(typecode.contentTypeCode.isType_d)$
 for(size_t i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
 {
-    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=originName)$
+    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=originName)$
 }
 $else$
 for(size_t i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 {
-    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=originName)$
+    $member_serialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=originName)$
 }
 $endif$
 >>
@@ -157,7 +217,7 @@ $endif$
 // ========================================================================================
 member_deserialization(ctx, typecode, name, originName) ::= <<
 $if(typecode.isType_c)$
-success &= ucdr_deserialize_uint32_t(reader, (uint32_t)&topic->$name$);
+success &= ucdr_deserialize_uint32_t(reader, (uint32_t*)&topic->$name$);
 $elseif(typecode.primitive)$
 success &= ucdr_deserialize_$typecode.cTypename$(reader, &topic->$name$);
 $elseif(typecode.isType_d)$
@@ -184,7 +244,7 @@ else
 {
     for(size_t i = 0; i < topic->$name$_size; ++i)
     {
-        $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
+        $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=name)$
     }
 }
 $endif$
@@ -201,12 +261,12 @@ success &= ucdr_deserialize_array_$typecode.cTypename$(reader, topic->$name$, si
 $elseif(typecode.contentTypeCode.isType_d)$
 for(size_t i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
 {
-    $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=originName)$
+    $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=originName)$
 }
 $else$
 for(size_t i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 {
-    $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=originName)$
+    $member_deserialization(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=originName)$
 }
 $endif$
 >>
@@ -235,7 +295,7 @@ size += ucdr_alignment(size, $typecode.contentTypeCode.size$) + topic->$name$_si
 $else$
 for(size_t i = 0; i < topic->$name$_size; ++i)
 {
-    $member_size(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=name)$
+    $member_size(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=name)$
 }
 $endif$
 >>
@@ -251,12 +311,12 @@ size += ucdr_alignment(size, $typecode.contentTypeCode.size$) + sizeof(topic->$n
 $elseif(typecode.contentTypeCode.isType_d)$
 for(size_t i = 0; i < sizeof(topic->$name$) / $typecode.contentTypeCode.maxsize$; ++i)
 {
-    $member_size(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=originName)$
+    $member_size(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=originName)$
 }
 $else$
 for(size_t i = 0; i < sizeof(topic->$name$) / sizeof($typecode.cTypename$); ++i)
 {
-    $member_size(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name), originName=originName)$
+    $member_size(ctx=ctx, typecode=typecode.contentTypeCode, name=indexName(name=name, suffix=""), originName=originName)$
 }
 $endif$
 >>

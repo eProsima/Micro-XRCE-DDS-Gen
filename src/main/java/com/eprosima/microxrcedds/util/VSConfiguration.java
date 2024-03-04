@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.eprosima.uxr.util;
+package com.eprosima.microxrcedds.util;
 
 public class VSConfiguration {
 
