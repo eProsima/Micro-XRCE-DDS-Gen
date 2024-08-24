@@ -10,4 +10,4 @@ if ! hash ${jave_exec}; then
 fi
 
 prefix="@prefix@"
-exec $java_exec -jar "@datadir@/microxrcedds/microxrceddsgen.jar" "$@"
+exec $java_exec -jar "@datadir@/microxrceddsgen/java/microxrceddsgen.jar" "$@"

@@ -9,4 +9,4 @@ if ! hash ${jave_exec}; then
     java_exec="${JAVA_HOME}/bin/java"
 fi
 
-exec $java_exec -jar "$dir/../share/microxrcedds/microxrceddsgen.jar" "$@"
+exec $java_exec -jar "$dir/../share/microxrceddsgen/java/microxrceddsgen.jar" "$@"

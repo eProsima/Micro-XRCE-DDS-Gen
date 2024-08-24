@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.eprosima.uxr;
+package com.eprosima.microxrcedds;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,18 +27,11 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.util.jar.Manifest;
 
-import org.antlr.stringtemplate.StringTemplate;
-import org.antlr.stringtemplate.StringTemplateErrorListener;
-import org.antlr.stringtemplate.StringTemplateGroup;
-import org.antlr.stringtemplate.language.DefaultTemplateLexer;
-import org.antlr.v4.runtime.ANTLRFileStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-
-import com.eprosima.uxr.exceptions.BadArgumentException;
-import com.eprosima.uxr.idl.grammar.Context;
+import com.eprosima.microxrcedds.exceptions.BadArgumentException;
+import com.eprosima.microxrcedds.idl.grammar.Context;
 import com.eprosima.solution.Project;
 import com.eprosima.solution.Solution;
-import com.eprosima.uxr.util.Utils;
+import com.eprosima.microxrcedds.util.Utils;
 import com.eprosima.idl.generator.manager.TemplateGroup;
 import com.eprosima.idl.generator.manager.TemplateManager;
 import com.eprosima.idl.parser.grammar.IDLLexer;
@@ -50,6 +43,11 @@ import com.eprosima.idl.parser.typecode.PrimitiveTypeCode;
 import com.eprosima.idl.parser.typecode.Kind;
 import com.eprosima.idl.util.Util;
 import com.eprosima.log.ColorMessage;
+
+import org.stringtemplate.v4.*;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 
 public class microxrceddsgen {
 
@@ -65,6 +63,7 @@ public class microxrceddsgen {
     private String m_tempDir = null;
     protected static String m_appName = "microxrceddsgen";
     protected boolean m_test = false;
+    protected String m_defaultContainerPreallocSize = "50";
 
     protected static String m_localAppProduct = "microxrcedds";
     private ArrayList<String> m_includePaths = new ArrayList<String>();
@@ -90,7 +89,22 @@ public class microxrceddsgen {
                 m_idlFiles.add(arg);
             }
             else if (arg.equals("-example")) {
-                m_exampleOption = true;
+                if (count < args.length)
+                {
+                    String example_option = args[count++];
+                    if (!example_option.equals("CMake"))
+                    {
+                        throw new BadArgumentException("Invalid example option specified after -example argument. Valid options are: CMake");
+                    }
+                    else
+                    {
+                        m_exampleOption = true;
+                    }
+                }
+                else
+                {
+                    throw new BadArgumentException("No example option specified after -example argument");
+                }
             }
             else if(arg.equals("-ppPath"))
             {
@@ -131,6 +145,29 @@ public class microxrceddsgen {
                     throw new BadArgumentException("No include directory specified after -I argument");
                 }
             }
+            else if (arg.equals("-cdr"))
+            {
+                if (count < args.length)
+                {
+                    String cdr_version_str = args[count++];
+                    if (!cdr_version_str.equals("v1"))
+                    {
+                        throw new BadArgumentException("Invalid CDR version specified after -cdr argument");
+                    }
+                }
+                else
+                {
+                    throw new BadArgumentException("No CDR version specified after -cdr argument");
+                }
+            }
+            else if (arg.equals("-default-container-prealloc-size"))
+            {
+                if (count < args.length) {
+                    m_defaultContainerPreallocSize = args[count++];
+                } else {
+                    throw new BadArgumentException("No value specified after -default-container-prealloc-size argument");
+                }
+            }
             else { // TODO: More options: -local, -rpm, -debug
                 throw new BadArgumentException("Unknown argument " + arg);
             }
@@ -141,26 +178,6 @@ public class microxrceddsgen {
             throw new BadArgumentException("No input files given");
         }
 
-    }
-
-    /*
-     * ----------------------------------------------------------------------------------------
-     *
-     * Listener classes
-     */
-
-    class TemplateErrorListener implements StringTemplateErrorListener
-    {
-        public void error(String arg0, Throwable arg1)
-        {
-            System.out.println(ColorMessage.error() + arg0);
-            arg1.printStackTrace();
-        }
-
-        public void warning(String arg0)
-        {
-            System.out.println(ColorMessage.warning() + arg0);
-        }
     }
 
     /*
@@ -187,13 +204,17 @@ public class microxrceddsgen {
 
             // Load string templates
             System.out.println("Loading templates...");
-            TemplateManager.setGroupLoaderDirectories("com/eprosima/uxr/idl/templates");
 
             for (int count = 0; returnedValue && (count < m_idlFiles.size()); ++count) {
                 Project project = process(m_idlFiles.get(count));
 
                 if (project != null) {
                     solution.addProject(project);
+
+                    for (String file : project.getFullDependencies()) {
+                        System.out.println("Adding dependency project " + file);
+                        Project depProject = process(file);
+                    }
                 } else {
                     returnedValue = false;
                 }
@@ -300,7 +321,11 @@ public class microxrceddsgen {
         }
 
         if (idlParseFileName != null) {
-            Context ctx = new Context(idlFileNameOnly, idlFileName, m_includePaths, true, true);
+            // Create template manager
+            TemplateManager tmanager = new TemplateManager();
+
+            // Create context
+            Context ctx = new Context(tmanager, idlFileNameOnly, idlFileName, m_includePaths, true, true, m_defaultContainerPreallocSize);
 
             if (m_case_sensitive)
             {
@@ -315,30 +340,27 @@ public class microxrceddsgen {
             AnnotationDeclaration topicann = ctx.createAnnotationDeclaration("Topic", null);
             topicann.addMember(new AnnotationMember("value", new PrimitiveTypeCode(Kind.KIND_BOOLEAN), "true"));
 
-            // Create template manager
-            TemplateManager tmanager = new TemplateManager("Common", ctx, false);
-
             // Load common types template
-            tmanager.addGroup("TypesHeader");
-            tmanager.addGroup("TypesSource");
+            tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/TypesHeader.stg");
+            tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/TypesSource.stg");
 
             // Load Publisher template
-            tmanager.addGroup("PublisherSource");
+            tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/PublisherSource.stg");
 
             // Load Subscriber template
-            tmanager.addGroup("SubscriberSource");
+            tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SubscriberSource.stg");
 
-            // Load test template
-            tmanager.addGroup("SerializationTestSource");
-            tmanager.addGroup("SerializationSource");
-            tmanager.addGroup("SerializationHeader");
+            // // Load test template
+            tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SerializationTestSource.stg");
+            tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SerializationSource.stg");
+            tmanager.addGroup("com/eprosima/microxrcedds/idl/templates/SerializationHeader.stg");
 
             // Create main template
             TemplateGroup maintemplates = tmanager.createTemplateGroup("main");
             maintemplates.setAttribute("ctx", ctx);
 
             try {
-                ANTLRFileStream input = new ANTLRFileStream(idlParseFileName);
+                CharStream input = CharStreams.fromFileName(idlParseFileName);
                 IDLLexer lexer = new IDLLexer(input);
                 lexer.setContext(ctx);
                 CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -363,26 +385,26 @@ public class microxrceddsgen {
                 System.out.println("Generating Type definition files...");
 
                 fileName = m_outputDir + idlFileNameOnly + ".h";
-                returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("TypesHeader"), m_replace);
+                returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("com/eprosima/microxrcedds/idl/templates/TypesHeader.stg"), m_replace);
                 project.addCommonIncludeFile(fileName);
 
                 fileName = m_outputDir + idlFileNameOnly + ".c";
-                returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("TypesSource"), m_replace);
+                returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("com/eprosima/microxrcedds/idl/templates/TypesSource.stg"), m_replace);
                 project.addCommonSrcFile(fileName);
 
                 if (m_test)
                 {
                     System.out.println("Generating Serialization Test file...");
                     fileName = m_outputDir + idlFileNameOnly + "SerializationTest.c";
-                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationTestSource"), m_replace);
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("com/eprosima/microxrcedds/idl/templates/SerializationTestSource.stg"), m_replace);
                     project.addCommonSrcFile(fileName);
 
                     fileName = m_outputDir + idlFileNameOnly + "Serialization.c";
-                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationSource"), m_replace);
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("com/eprosima/microxrcedds/idl/templates/SerializationSource.stg"), m_replace);
                     project.addCommonSrcFile(fileName);
 
                     fileName = m_outputDir + idlFileNameOnly + "Serialization.h";
-                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SerializationHeader"), m_replace);
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("com/eprosima/microxrcedds/idl/templates/SerializationHeader.stg"), m_replace);
                     project.addCommonSrcFile(fileName);
                 }
 
@@ -391,11 +413,11 @@ public class microxrceddsgen {
                     System.out.println("Generating publisher and subcriber example files...");
 
                     fileName = m_outputDir + idlFileNameOnly + "Publisher.c";
-                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("PublisherSource"), m_replace);
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("com/eprosima/microxrcedds/idl/templates/PublisherSource.stg"), m_replace);
                     project.addCommonSrcFile(fileName);
 
                     fileName = m_outputDir + idlFileNameOnly + "Subscriber.c";
-                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("SubscriberSource"), m_replace);
+                    returnedValue = Utils.writeFile(fileName, maintemplates.getTemplate("com/eprosima/microxrcedds/idl/templates/SubscriberSource.stg"), m_replace);
                     project.addCommonSrcFile(fileName);
                 }
             }
@@ -413,18 +435,18 @@ public class microxrceddsgen {
     private boolean genCMakeLists(Solution solution)
     {
         boolean returnedValue = false;
-
-        StringTemplateGroup cmakeTemplates = StringTemplateGroup.loadGroup("CMakeLists", DefaultTemplateLexer.class, null);
+        ST cmake = null;
+        STGroupFile cmakeTemplates = new STGroupFile("com/eprosima/microxrcedds/idl/templates/CMakeLists.stg", '$', '$');
 
         if (cmakeTemplates != null)
         {
-            StringTemplate cmakelists = cmakeTemplates.getInstanceOf("cmakelists");
+            cmake = cmakeTemplates.getInstanceOf("cmakelists");
 
-            cmakelists.setAttribute("solution", solution);
-            cmakelists.setAttribute("examples", m_exampleOption);
-            cmakelists.setAttribute("test", m_test);
+            cmake.add("solution", solution);
+            cmake.add("examples", m_exampleOption);
+            cmake.add("test", m_test);
 
-            returnedValue = Utils.writeFile(m_outputDir + "CMakeLists.txt", cmakelists, m_replace);
+            returnedValue = Utils.writeFile(m_outputDir + "CMakeLists.txt", cmake, m_replace);
         }
 
         return returnedValue;

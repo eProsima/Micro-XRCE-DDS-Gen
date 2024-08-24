@@ -1,5 +1,0 @@
-
-struct IncludeType {
-    long               include_long_1;
-    long               include_long_2;
-};
