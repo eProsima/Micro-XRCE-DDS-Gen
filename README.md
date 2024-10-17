@@ -30,7 +30,3 @@ You can access Micro XRCE-DDS documentation online, which is hosted on Read the 
 * [Start Page](http://micro-xrce-dds.readthedocs.io)
 * [Installation manual](http://micro-xrce-dds.readthedocs.io/en/latest/installation.html)
 * [Tool manual](http://micro-xrce-dds.readthedocs.io/en/latest/gen.html)
-
-## Getting Help
-
-If you need support you can reach us by mail at `support@eProsima.com` or by phone at `+34 91 804 34 48`.
