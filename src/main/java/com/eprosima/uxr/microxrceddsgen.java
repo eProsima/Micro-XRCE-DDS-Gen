@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Vector;
 import java.util.jar.Manifest;
 
@@ -63,6 +64,7 @@ public class microxrceddsgen {
     private final String m_defaultOutputDir = "." + File.separator;
     private String m_outputDir = m_defaultOutputDir;
     private String m_tempDir = null;
+    private boolean m_tempDirCleanup = false;
     protected static String m_appName = "microxrceddsgen";
     protected boolean m_test = false;
 
@@ -207,6 +209,13 @@ public class microxrceddsgen {
             }
         }
 
+        if (returnedValue)
+        {
+            // be nice and clean up if no error; user may want files if there
+            // was an issue (though they have no real ability to find them...)
+            cleanUpTemp();
+        }
+
         return returnedValue;
 
     }
@@ -251,16 +260,15 @@ public class microxrceddsgen {
     public boolean globalInit() {
         // Set the temporary folder
         if (m_tempDir == null) {
-            if (m_os.contains("Windows")) {
-                String tempPath = System.getenv("TEMP");
-
-                if (tempPath == null) {
-                    tempPath = System.getenv("TMP");
-                }
-
-                m_tempDir = tempPath;
-            } else if (m_os.contains("Linux") || m_os.contains("Mac")) {
-                m_tempDir = "/tmp/";
+            try
+            {
+                m_tempDir = java.nio.file.Files.createTempDirectory("microxrceddsgen").toString();
+                m_tempDirCleanup = true; // as we created it
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                return false;
             }
         }
 
@@ -269,6 +277,36 @@ public class microxrceddsgen {
         }
 
         return true;
+    }
+
+    private void cleanUpTemp() {
+        if (!m_tempDirCleanup) {
+            return;
+        }
+
+        try
+        {
+            // https://stackoverflow.com/a/27917071 . it's "very simple"
+            java.nio.file.Path directory = java.nio.file.Paths.get(m_tempDir);
+            java.nio.file.Files.walkFileTree(directory, new java.nio.file.SimpleFileVisitor<java.nio.file.Path>() {
+               @Override
+               public java.nio.file.FileVisitResult visitFile(java.nio.file.Path file, java.nio.file.attribute.BasicFileAttributes attrs) throws IOException {
+                   java.nio.file.Files.delete(file);
+                   return java.nio.file.FileVisitResult.CONTINUE;
+               }
+
+               @Override
+               public java.nio.file.FileVisitResult postVisitDirectory(java.nio.file.Path dir, IOException exc) throws IOException {
+                   java.nio.file.Files.delete(dir);
+                   return java.nio.file.FileVisitResult.CONTINUE;
+               }
+            });
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            // we tried!
+        }
     }
 
     private Project process(String idlFilename) {
