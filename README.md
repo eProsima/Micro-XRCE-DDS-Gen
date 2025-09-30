@@ -17,6 +17,12 @@ the code generated does not depend of it and can be used externally with the onl
 
 <p align="center"> <img src="docs/general_architecture.png" alt="Image"/> </p>
 
+## Commercial support
+
+Looking for commercial support? Write us to info@eprosima.com
+
+Find more about us at [eProsima’s webpage](https://eprosima.com/).
+
 ## Documentation
 
 You can access Micro XRCE-DDS documentation online, which is hosted on Read the Docs.
@@ -24,7 +30,3 @@ You can access Micro XRCE-DDS documentation online, which is hosted on Read the 
 * [Start Page](http://micro-xrce-dds.readthedocs.io)
 * [Installation manual](http://micro-xrce-dds.readthedocs.io/en/latest/installation.html)
 * [Tool manual](http://micro-xrce-dds.readthedocs.io/en/latest/gen.html)
-
-## Getting Help
-
-If you need support you can reach us by mail at `support@eProsima.com` or by phone at `+34 91 804 34 48`.
