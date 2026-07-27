@@ -15,7 +15,6 @@
 package com.eprosima.uxr.idl.parser.typecode;
 
 import com.eprosima.idl.parser.typecode.Member;
-import com.eprosima.idl.parser.tree.Annotation;
 
 public class StructTypeCode extends com.eprosima.idl.parser.typecode.StructTypeCode
 {
@@ -31,15 +30,7 @@ public class StructTypeCode extends com.eprosima.idl.parser.typecode.StructTypeC
         for(int count = 0; count < getMembers().size() && !returnedValue; ++count)
         {
             Member member = getMembers().get(count);
-            Annotation key = member.getAnnotations().get("Key");
-
-            if(key != null)
-            {
-                String value = key.getValue("value");
-
-                if(value != null && value.equals("true"))
-                    returnedValue = true;
-            }
+            returnedValue = member.isAnnotationKey();
         }
 
         return returnedValue;
